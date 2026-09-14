@@ -205,6 +205,19 @@ tbody tr:last-child td{border-bottom:0}
 .hhfcu-card .chip{width:32px;height:23px;border-radius:5px;background:linear-gradient(135deg,#f4c948,#e0a92e);margin-top:30px}
 .hhfcu-card .num{font-family:var(--disp);font-size:1.15rem;letter-spacing:2px;margin-top:12px}
 .hhfcu-card .row{display:flex;justify-content:space-between;margin-top:12px;font-size:.8rem;opacity:.94}
+/* ---- mobile bottom tab bar ---- */
+.botnav{display:none}
+@media(max-width:760px){
+  .tabs{display:none}
+  .botnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 16px rgba(11,59,140,.12);padding-bottom:env(safe-area-inset-bottom)}
+  .botnav button{flex:1 1 0;min-width:0;border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 1px 6px;font-family:var(--sans);font-size:9.5px;font-weight:600;cursor:pointer;touch-action:manipulation;min-height:54px}
+  .botnav button svg{width:22px;height:22px;flex:0 0 auto}
+  .botnav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .botnav button[aria-selected="true"]{color:var(--blue)}
+  .toast{bottom:calc(74px + env(safe-area-inset-bottom))}
+  .bfc{margin-bottom:calc(58px + env(safe-area-inset-bottom))}
+  [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
+}
 </style>
 </head>
 <body>
@@ -498,6 +511,14 @@ tbody tr:last-child td{border-bottom:0}
 
   <div class="foot">PayExpress is a product prototype for demonstration. No real accounts, cards, or funds are processed.</div>
 </main>
+<nav class="botnav" role="tablist" aria-label="Sections">
+  <button aria-selected="true" onclick="go('send')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg><span>Send</span></button>
+  <button aria-selected="false" onclick="go('activity')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Activity</span></button>
+  <button aria-selected="false" onclick="go('cards')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Cards</span></button>
+  <button aria-selected="false" onclick="go('recipients')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg><span>People</span></button>
+  <button aria-selected="false" onclick="go('verify')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Verify</span></button>
+  <button aria-selected="false" onclick="go('partners')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg><span>Partners</span></button>
+</nav>
 <div class="bfc">Powered by <b>BizFormCorp</b> and <b>HHFCU</b></div>
 <div class="toast" id="toast"></div>
 
@@ -510,7 +531,7 @@ function go(v){
   var el=document.getElementById("view-"+v); if(!el) return;
   var views=document.querySelectorAll(".view"); for(var i=0;i<views.length;i++)views[i].classList.remove("active");
   el.classList.add("active");
-  var tabs=document.querySelectorAll(".tabs button");
+  var tabs=document.querySelectorAll(".tabs button, .botnav button");
   for(var j=0;j<tabs.length;j++){var oc=tabs[j].getAttribute("onclick")||"";tabs[j].setAttribute("aria-selected", oc.indexOf("go('"+v+"'")===0?"true":"false");}
   var t=document.querySelector('.tabs button[aria-selected="true"]'); if(t&&t.scrollIntoView)t.scrollIntoView({inline:"center",block:"nearest"});
   window.scrollTo({top:0,behavior:"smooth"});
