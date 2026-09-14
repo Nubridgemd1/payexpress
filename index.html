@@ -181,6 +181,30 @@ tbody tr:last-child td{border-bottom:0}
 .mini .b{background:var(--card);padding:13px 14px}
 .mini .k{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .mini .v{font-family:var(--disp);font-weight:700;font-size:1.05rem;margin-top:3px}
+/* ---- KYC / upload ---- */
+.kyc{max-width:680px}
+.kyc h3{font-size:1.05rem;color:var(--ink)}
+.kyc .hint{color:var(--muted);font-size:.86rem;margin:2px 0 12px}
+.dzs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.dzs{grid-template-columns:1fr}}
+.dz{border:1.5px dashed var(--line2);border-radius:12px;background:var(--card2);padding:13px;display:flex;flex-direction:column;gap:9px}
+.dz .dt{font-weight:600;font-size:.88rem;color:var(--ink)}
+.dz .dh{font-size:.75rem;color:var(--muted);margin-top:-5px}
+.dz-btns{display:flex;gap:8px}
+.dz-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--card);border:1px solid var(--line2);border-radius:9px;padding:10px 6px;font-size:.82rem;font-weight:600;color:var(--blue-dark);cursor:pointer;min-height:44px;touch-action:manipulation}
+.dz-btn svg{width:16px;height:16px}
+.dz-file{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:7px 9px}
+.dz-thumb{width:40px;height:30px;border-radius:5px;object-fit:cover;background:var(--blue-dark);flex:0 0 auto;display:grid;place-items:center;color:#fff;font-size:.6rem;font-weight:700}
+.dz-meta{flex:1;min-width:0}.dz-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dz-size{font-size:.72rem;color:var(--muted)}
+.dz-x{border:0;background:transparent;color:var(--bad);cursor:pointer;font-size:1.1rem;line-height:1;padding:4px}
+.opt{display:flex;gap:11px;align-items:flex-start;padding:13px;border:1px solid var(--line2);border-radius:11px;background:var(--card);cursor:pointer;font-size:.9rem;margin-bottom:10px}
+.opt input{width:19px;height:19px;margin-top:1px;accent-color:var(--blue);flex:0 0 auto}
+.hhfcu-card{background:linear-gradient(135deg,#0b3b8c,#2b7de9);color:#fff;border-radius:16px;padding:18px;min-height:150px;position:relative;overflow:hidden;box-shadow:var(--shadow);max-width:360px}
+.hhfcu-card .co{font-family:var(--disp);font-weight:700;font-size:1.05rem}
+.hhfcu-card .by{position:absolute;top:15px;right:16px;font-size:.68rem;opacity:.92;text-align:right;line-height:1.3}
+.hhfcu-card .chip{width:32px;height:23px;border-radius:5px;background:linear-gradient(135deg,#f4c948,#e0a92e);margin-top:30px}
+.hhfcu-card .num{font-family:var(--disp);font-size:1.15rem;letter-spacing:2px;margin-top:12px}
+.hhfcu-card .row{display:flex;justify-content:space-between;margin-top:12px;font-size:.8rem;opacity:.94}
 </style>
 </head>
 <body>
@@ -200,6 +224,7 @@ tbody tr:last-child td{border-bottom:0}
       <button role="tab" aria-selected="false" onclick="go('activity')">Activity</button>
       <button role="tab" aria-selected="false" onclick="go('cards')">Cards</button>
       <button role="tab" aria-selected="false" onclick="go('recipients')">Recipients</button>
+      <button role="tab" aria-selected="false" onclick="go('verify')">Verify</button>
       <button role="tab" aria-selected="false" onclick="go('partners')">For partners</button>
     </div>
     <span class="spacer"></span>
@@ -290,6 +315,7 @@ tbody tr:last-child td{border-bottom:0}
   <!-- CARDS -->
   <section class="view" id="view-cards">
     <div class="section-h"><div><div class="eyebrow">Card services</div><h1 style="font-size:1.5rem;margin-top:3px">Cards</h1></div></div>
+    <div class="card pad" id="hhfcuCardBox" style="margin-bottom:16px"></div>
     <p class="lead" style="margin-bottom:16px">Pay from your saved cards, and give recipients a card of their own - a local Naira card for spending at home, or an international USD card for online and travel.</p>
     <div class="cardgrid">
       <div class="paycard local">
@@ -339,6 +365,83 @@ tbody tr:last-child td{border-bottom:0}
       <div class="field"><label>Bank</label><select><option>GTBank</option><option>Access Bank</option><option>Zenith Bank</option><option>First Bank</option><option>UBA</option><option>Opay / Moniepoint (wallet)</option></select></div>
       <div class="field"><label>Account number (NUBAN)</label><input class="mono" inputmode="numeric" placeholder="10-digit account number"></div>
       <button class="btn btn-primary" style="margin-top:14px" onclick="toast('Recipient saved (demo)')">Save recipient</button>
+    </div>
+  </section>
+
+  <!-- VERIFY / KYC -->
+  <section class="view" id="view-verify">
+    <div class="section-h"><div><div class="eyebrow">Identity verification (KYC)</div><h1 style="font-size:1.5rem;margin-top:3px">Verify your identity</h1></div></div>
+    <p class="lead" style="margin-bottom:4px">Sending money requires a quick identity check - about 2 minutes with your ID to hand. You can also request an HHFCU debit card at the end.</p>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Prototype - please do not enter real personal data.</p>
+
+    <div class="kyc" id="kycForm">
+      <div class="card pad">
+        <h3 style="margin:0 0 10px">Your details</h3>
+        <div class="field"><label>Full legal name</label><input id="k-name" placeholder="As shown on your ID"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Date of birth</label><input id="k-dob" placeholder="MM/DD/YYYY" inputmode="numeric"></div>
+          <div class="field"><label>SSN / ITIN</label><input id="k-ssn" placeholder="___-__-____" inputmode="numeric"></div>
+        </div>
+        <div class="field"><label>Residential address</label><input id="k-addr" placeholder="Street, city, state, ZIP"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Mobile number</label><input id="k-phone" inputmode="tel"></div>
+          <div class="field"><label>Email</label><input id="k-email" type="email"></div>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-top:14px">
+        <h3 style="margin:0">Verify with a photo ID</h3>
+        <p class="hint">Snap a photo with your phone camera or upload a file. Accepts photo or PDF.</p>
+        <div class="dzs">
+          <div class="dz">
+            <div class="dt">Government ID - front</div><div class="dh">License, passport or state ID</div>
+            <div class="dz-btns">
+              <label class="dz-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg> Upload<input type="file" hidden onchange="addKyc('idfront',this.files)"></label>
+              <label class="dz-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Camera<input type="file" accept="image/*" capture="environment" hidden onchange="addKyc('idfront',this.files)"></label>
+            </div>
+            <div id="f-idfront"></div>
+          </div>
+          <div class="dz">
+            <div class="dt">Government ID - back</div><div class="dh">If your ID has a back</div>
+            <div class="dz-btns">
+              <label class="dz-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg> Upload<input type="file" hidden onchange="addKyc('idback',this.files)"></label>
+              <label class="dz-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Camera<input type="file" accept="image/*" capture="environment" hidden onchange="addKyc('idback',this.files)"></label>
+            </div>
+            <div id="f-idback"></div>
+          </div>
+          <div class="dz">
+            <div class="dt">Selfie</div><div class="dh">A clear photo of your face</div>
+            <div class="dz-btns">
+              <label class="dz-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg> Upload<input type="file" hidden onchange="addKyc('selfie',this.files)"></label>
+              <label class="dz-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Camera<input type="file" accept="image/*" capture="user" hidden onchange="addKyc('selfie',this.files)"></label>
+            </div>
+            <div id="f-selfie"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-top:14px">
+        <h3 style="margin:0">Request an HHFCU debit card <span style="font-weight:400;color:var(--muted);font-size:.85rem">- optional</span></h3>
+        <p class="hint">A Heritage Hub Federal Credit Union debit card linked to your PayExpress activity. NCUA-insured.</p>
+        <label class="opt"><input type="checkbox" id="chkVirtual" checked> <span><b>Virtual card</b> - issued instantly, spend online right away.</span></label>
+        <label class="opt"><input type="checkbox" id="chkPlastic"> <span><b>Plastic card</b> - mailed to your address in 7-10 business days.</span></label>
+        <div class="hhfcu-card" style="margin:12px 0">
+          <div class="co">PayExpress</div><div class="by">Debit<br>HHFCU</div><div class="chip"></div>
+          <div class="num mono">****  ****  ****  ****</div>
+          <div class="row"><span>YOUR NAME</span><span>NCUA insured</span></div>
+        </div>
+        <label class="opt"><input type="checkbox" id="k-consent"> <span>I authorize PayExpress and HHFCU to verify my identity and, if requested, issue a debit card, and I agree to the E-SIGN consent and card terms.</span></label>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="submitKyc()">Submit and verify</button>
+    </div>
+
+    <div class="card pad hidden" id="kycDone" style="text-align:center">
+      <div style="width:66px;height:66px;border-radius:50%;background:var(--good-w);color:var(--good);display:grid;place-items:center;margin:6px auto 14px"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h2 style="font-size:1.35rem">Identity submitted</h2>
+      <p class="hint" style="max-width:46ch;margin:6px auto 16px">Your details are in review - most checks clear within minutes. We will let you know as soon as you are cleared to send.</p>
+      <div id="kycCardWrap" style="display:flex;justify-content:center"></div>
+      <div style="margin-top:16px"><button class="btn btn-ghost" onclick="go('cards')">View my cards</button></div>
     </div>
   </section>
 
@@ -472,7 +575,36 @@ function loadCfg(){
   var rl=document.getElementById("rateLine"); if(rl)rl.textContent="1 USD = "+r+" NGN";
 }
 
-loadCfg(); calc(); renderActivity();
+/* ---- KYC / HHFCU card ---- */
+var KYCF={idfront:[],idback:[],selfie:[]};
+function kbSize(b){return b>1048576?(b/1048576).toFixed(1)+" MB":Math.round(b/1024)+" KB";}
+function addKyc(key,files){var a=KYCF[key];for(var i=0;i<files.length;i++){var f=files[i];a.push({name:f.name,size:f.size,url:(f.type&&f.type.indexOf("image")===0?URL.createObjectURL(f):null)});}renderKyc(key);}
+function rmKyc(key,i){KYCF[key].splice(i,1);renderKyc(key);}
+function renderKyc(key){var box=document.getElementById("f-"+key);if(!box)return;var h="";for(var i=0;i<KYCF[key].length;i++){var f=KYCF[key][i];var th=f.url?'<img class="dz-thumb" alt="" src="'+f.url+'">':'<span class="dz-thumb">'+(f.name.split(".").pop()||"FILE").toUpperCase().slice(0,4)+'</span>';h+='<div class="dz-file">'+th+'<div class="dz-meta"><div class="dz-name">'+f.name+'</div><div class="dz-size">'+kbSize(f.size)+'</div></div><button class="dz-x" onclick="rmKyc(\''+key+'\','+i+')">x</button></div>';}box.innerHTML=h;}
+function cardHtml(c){return '<div class="hhfcu-card"><div class="co">PayExpress</div><div class="by">Debit<br>HHFCU</div><div class="chip"></div><div class="num mono">4127  88**  ****  '+c.last4+'</div><div class="row"><span>'+c.holder+'</span><span>'+(c.virtual?"VIRTUAL":"DEBIT")+'</span></div></div>';}
+function getCard(){try{return JSON.parse(localStorage.getItem("px_hhfcu_card")||"null")}catch(e){return null;}}
+function renderHhfcuCard(){
+  var c=getCard();var box=document.getElementById("hhfcuCardBox");
+  if(box){ box.innerHTML = (c&&c.issued) ? '<div style="font-weight:600;color:var(--ink);margin-bottom:10px">Your HHFCU debit card</div>'+cardHtml(c)+(c.plastic?'<p style="font-size:.82rem;color:var(--muted);margin-top:8px">Plastic card mailed in 7-10 business days.</p>':'') : '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h3 style="font-size:1.05rem;color:var(--ink)">Your HHFCU debit card</h3><p style="font-size:.88rem;color:var(--muted);margin-top:2px">Verify your identity to request a virtual or plastic card.</p></div><button class="btn btn-primary" onclick="go(\'verify\')">Get your card</button></div>'; }
+  var kw=document.getElementById("kycCardWrap");
+  if(kw&&c&&c.issued){kw.innerHTML='<div style="max-width:360px;width:100%"><div style="font-weight:600;color:var(--ink);margin-bottom:8px">'+(c.virtual?"Your virtual HHFCU debit card is ready":"Your HHFCU debit card is on its way")+'</div>'+cardHtml(c)+'</div>';}
+}
+function submitKyc(){
+  var name=document.getElementById("k-name").value;
+  if(!name){toast("Enter your full legal name");return;}
+  if(!KYCF.idfront.length){toast("Add a photo of your government ID");return;}
+  if(!document.getElementById("k-consent").checked){toast("Please authorize identity verification");return;}
+  try{localStorage.setItem("px_kyc",JSON.stringify({status:"pending",name:name}));}catch(e){}
+  var virt=document.getElementById("chkVirtual").checked,plas=document.getElementById("chkPlastic").checked;
+  if(virt||plas){var card={holder:name.toUpperCase().slice(0,22),last4:String(Math.floor(1000+Math.random()*9000)),virtual:virt,plastic:plas,issued:true};try{localStorage.setItem("px_hhfcu_card",JSON.stringify(card));}catch(e){}}
+  renderHhfcuCard();
+  document.getElementById("kycForm").classList.add("hidden");
+  document.getElementById("kycDone").classList.remove("hidden");
+  toast("Identity submitted for verification");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+loadCfg(); calc(); renderActivity(); renderHhfcuCard();
 </script>
 </body>
 </html>
