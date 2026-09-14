@@ -5,8 +5,7 @@
 <title>PayExpress</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="description" content="PayExpress - fast, low-cost money transfers to Nigeria, with card services and easy IMTO integration." />
-<meta name="theme-color" content="#f3f7fc" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#08152a" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#0b3b8c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="PayExpress" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,7 +15,7 @@
 :root{
   --blue-dark:#0b3b8c; --blue:#2b7de9; --blue-light:#6fb4f2; --blue-wash:#e7f0fd;
   --ink:#0d1b2e; --body:#3c4a5e; --muted:#697788;
-  --ground:#f3f7fc; --card:#ffffff; --card2:#f6f9fd; --line:#e0e8f2; --line2:#cfdbea;
+  --ground:#e8f0fc; --card:#ffffff; --card2:#f4f8fe; --line:#dde7f5; --line2:#c9d8ee;
   --good:#12915a; --good-w:#e4f4ec; --warn:#b5730c; --warn-w:#fbefd9; --bad:#c02b2b; --bad-w:#fbe8e8;
   --shadow:0 1px 2px rgba(11,59,140,.06),0 8px 26px rgba(11,59,140,.07);
   --shadow-lg:0 16px 44px rgba(11,59,140,.16);
@@ -48,18 +47,18 @@ button{font-family:inherit}
 a{color:var(--blue)}
 
 /* top bar */
-.top{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--card) 88%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
-.top-in{max-width:1040px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px}
+.top{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,#0b3b8c,#2b7de9);border-bottom:0;box-shadow:0 2px 14px rgba(11,59,140,.22);padding-top:env(safe-area-inset-top)}
+.top-in{max-width:1040px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:12px}
 .top-in{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:1.16rem;letter-spacing:-.01em;color:var(--ink);cursor:pointer}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:1.16rem;letter-spacing:-.01em;color:#fff;cursor:pointer;flex:0 0 auto}
 .brand svg{width:34px;height:34px;flex:0 0 auto}
-.tabs{display:flex;gap:2px;margin-left:6px;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+.tabs{display:flex;gap:2px;margin-left:2px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
 .tabs::-webkit-scrollbar{display:none}
-.tabs button{border:0;background:transparent;color:var(--muted);font-size:.9rem;font-weight:600;padding:9px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;touch-action:manipulation}
-.tabs button:hover{color:var(--ink);background:var(--card2)}
-.tabs button[aria-selected="true"]{color:var(--blue-dark);background:var(--blue-wash)}
-.spacer{flex:1}
-.icon-btn{border:1px solid var(--line2);background:var(--card);color:var(--body);width:40px;height:40px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:0 0 auto;touch-action:manipulation}
+.tabs button{border:0;background:transparent;color:rgba(255,255,255,.82);font-size:.9rem;font-weight:600;padding:9px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+.tabs button:hover{color:#fff;background:rgba(255,255,255,.14)}
+.tabs button[aria-selected="true"]{color:#fff;background:rgba(255,255,255,.22)}
+.spacer{display:none}
+.icon-btn{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:0 0 auto;touch-action:manipulation}
 .icon-btn svg{width:17px;height:17px}
 
 main{max-width:1040px;margin:0 auto;padding:24px 20px 90px;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));padding-bottom:calc(90px + env(safe-area-inset-bottom))}
@@ -189,11 +188,10 @@ tbody tr:last-child td{border-bottom:0}
   <div class="top-in">
     <div class="brand" onclick="go('send')" aria-label="PayExpress home">
       <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <rect width="40" height="40" rx="10" fill="#0b3b8c"/>
-        <path d="M6 15c3-3.4 6-3.4 9 0s6 3.4 9 0 6-3.4 9 0" stroke="#0b3b8c" stroke-width="0"/>
-        <path d="M5 16c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#6fb4f2" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-        <path d="M5 21c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#2b7de9" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-        <path d="M5 26c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <rect width="40" height="40" rx="10" fill="#ffffff"/>
+        <path d="M5 16c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#0b3b8c" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+        <path d="M5 21c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#2b7de9" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+        <path d="M5 26c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#6fb4f2" stroke-width="2.6" stroke-linecap="round" fill="none"/>
       </svg>
       PayExpress
     </div>
@@ -348,7 +346,7 @@ tbody tr:last-child td{border-bottom:0}
   <section class="view" id="view-partners">
     <div class="eyebrow">For IMTOs, banks &amp; fintechs in Nigeria</div>
     <h1 style="font-size:1.6rem;margin:4px 0 6px">Plug PayExpress into your payout rails</h1>
-    <p class="lead" style="margin-bottom:20px">PayExpress originates and screens compliant USD transfers in the United States and hands you clean, funded, ready-to-pay instructions. Connect your IMTO or bank in Nigeria with a single REST API and start receiving payouts.</p>
+    <p class="lead" style="margin-bottom:20px">PayExpress collects the sender's USD in a US receivable account, screens it, and pushes the payment instruction to your platform in real time. You credit the beneficiary once the corresponding USD has settled in that receivable account - so every payout is backed by funds you can see, with no pre-funding risk. Connect with a single REST API and webhook.</p>
 
     <div class="feat">
       <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><h4>One REST API</h4><p>Create payouts, check status, and reconcile with a documented JSON API and sandbox keys.</p></div>
@@ -359,19 +357,31 @@ tbody tr:last-child td{border-bottom:0}
       <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h4>CBN-aligned</h4><p>Built to operate within the CBN IMTO / authorised-dealer framework.</p></div>
     </div>
 
-    <div class="section-h" style="margin-top:26px"><h3 style="font-size:1.1rem">Create a payout - it is this simple</h3></div>
-    <div class="code"><span class="c">// POST https://api.payexpress.com/v1/payouts</span><br>
+    <div class="section-h" style="margin-top:26px"><div><div class="eyebrow">Settlement model</div><h3 style="font-size:1.1rem;margin-top:3px">Real-time instructions, settle-then-credit</h3></div></div>
+    <div class="card pad">
+      <div class="cycle">
+        <div class="node"><div class="num">1</div><h4>Sender pays USD</h4><p>Card charged in the US</p></div>
+        <div class="node"><div class="num">2</div><h4>USD settles</h4><p>Into the US receivable account</p></div>
+        <div class="node"><div class="num">3</div><h4>Instruction pushed</h4><p>Real-time webhook to your IMTO</p></div>
+        <div class="node"><div class="num">4</div><h4>Credit beneficiary</h4><p>Pay out NGN against settled funds</p></div>
+        <div class="node"><div class="num">5</div><h4>Reconcile</h4><p>USD remitted to your nostro on cycle</p></div>
+      </div>
+      <div class="callout" style="margin-top:14px">Instructions arrive in <b>real time</b>, each carrying a <b>settlement confirmation</b>. Your platform credits the beneficiary only once the matching USD has <b>settled in the US receivable account</b> - no pre-funding, no payout risk.</div>
+    </div>
+
+    <div class="section-h" style="margin-top:26px"><h3 style="font-size:1.1rem">The real-time instruction your platform receives</h3></div>
+    <div class="code"><span class="c">// Webhook (real time) -&gt; POST https://your-imto.ng/webhooks/payexpress</span><br>
 {<br>
-&nbsp;&nbsp;<span class="k">"amount_ngn"</span>: <span class="s">792500</span>,<br>
+&nbsp;&nbsp;<span class="k">"event"</span>: <span class="s">"payout.instruction"</span>,<br>
 &nbsp;&nbsp;<span class="k">"reference"</span>: <span class="s">"PX-8842013"</span>,<br>
+&nbsp;&nbsp;<span class="k">"settlement_status"</span>: <span class="s">"settled"</span>,<span class="c"> // USD confirmed in US receivable a/c</span><br>
+&nbsp;&nbsp;<span class="k">"usd_amount"</span>: <span class="s">500.00</span>,<br>
+&nbsp;&nbsp;<span class="k">"amount_ngn"</span>: <span class="s">792500</span>,<br>
 &nbsp;&nbsp;<span class="k">"method"</span>: <span class="s">"bank_account"</span>,<br>
-&nbsp;&nbsp;<span class="k">"recipient"</span>: {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"name"</span>: <span class="s">"Adaeze Okafor"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"bank_code"</span>: <span class="s">"058"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"nuban"</span>: <span class="s">"0123454471"</span><br>
-&nbsp;&nbsp;},<br>
-&nbsp;&nbsp;<span class="k">"callback_url"</span>: <span class="s">"https://your-imto.ng/webhooks/payexpress"</span><br>
-}</div>
+&nbsp;&nbsp;<span class="k">"recipient"</span>: { <span class="k">"name"</span>: <span class="s">"Adaeze Okafor"</span>, <span class="k">"bank_code"</span>: <span class="s">"058"</span>, <span class="k">"nuban"</span>: <span class="s">"0123454471"</span> }<br>
+}<br>
+<span class="c">// You credit the beneficiary, then acknowledge:</span><br>
+<span class="c">// POST https://api.payexpress.com/v1/payouts/PX-8842013/ack  { "status": "paid" }</span></div>
 
     <div class="section-h" style="margin-top:26px"><h3 style="font-size:1.1rem">Go live in four steps</h3></div>
     <div class="steps">
