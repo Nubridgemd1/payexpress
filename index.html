@@ -224,7 +224,7 @@ tbody tr:last-child td{border-bottom:0}
         </div>
         <div class="mini">
           <div class="b"><div class="k">Transfer fee</div><div class="v mono" id="mFee">$7.50</div></div>
-          <div class="b"><div class="k">Rate</div><div class="v mono">1,585</div></div>
+          <div class="b"><div class="k">Rate</div><div class="v mono" id="mRate">1,585</div></div>
           <div class="b"><div class="k">Payout speed</div><div class="v">Minutes</div></div>
         </div>
       </div>
@@ -238,7 +238,7 @@ tbody tr:last-child td{border-bottom:0}
           <div style="flex:1"><div class="lbl">They receive</div><div class="amt mono" id="recvAmt">0</div></div>
           <span class="cur"><span class="flag" style="background:linear-gradient(90deg,#008751 0 33%,#fff 33% 66%,#008751 66%)"></span> NGN</span>
         </div>
-        <div class="rate-line"><span>Exchange rate</span><b class="mono">1 USD = 1,585 NGN</b></div>
+        <div class="rate-line"><span>Exchange rate</span><b class="mono" id="rateLine">1 USD = 1,585 NGN</b></div>
         <div class="rate-line"><span>Transfer fee</span><b class="mono" id="feeLine">$7.50</b></div>
         <div class="rate-line" style="border-top:1px solid var(--line);margin-top:4px;padding-top:10px"><span>Total to pay</span><b class="mono" id="totalLine">$507.50</b></div>
 
@@ -449,18 +449,30 @@ function renderActivity(){
   }
   b.innerHTML=h;
 }
+function persistTxn(t){try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");a.unshift(t);localStorage.setItem("px_txns",JSON.stringify(a.slice(0,200)));}catch(e){}}
 function sendMoney(){
   var usd=num(document.getElementById("sendAmt").value);
   if(usd<=0){toast("Enter an amount to send");return;}
   var recip=document.getElementById("recip").value.split(" - ")[0];
+  var ref="PX-"+Math.floor(1000000+Math.random()*9000000);
   transfers.unshift({name:recip, method:method, usd:usd, status:"proc", date:"Now"});
+  persistTxn({ref:ref, date:new Date().toISOString(), sender:"App user", recipient:recip, method:method, usd:usd, ngn:Math.round(usd*RATE), status:"Processing"});
   renderActivity();
   toast("Transfer of "+fmt(usd)+" started to "+recip);
   go("activity");
   setTimeout(function(){ if(transfers[0]){transfers[0].status="paid";renderActivity();} },2600);
 }
 
-calc(); renderActivity();
+function loadCfg(){
+  try{var c=JSON.parse(localStorage.getItem("px_cfg")||"null");
+    if(c){ if(c.rate)RATE=c.rate; if(c.feePct!=null)FEEPCT=c.feePct/100; if(c.feeMin!=null)FEEMIN=c.feeMin; }
+  }catch(e){}
+  var r=Math.round(RATE).toLocaleString("en-US");
+  var mr=document.getElementById("mRate"); if(mr)mr.textContent=r;
+  var rl=document.getElementById("rateLine"); if(rl)rl.textContent="1 USD = "+r+" NGN";
+}
+
+loadCfg(); calc(); renderActivity();
 </script>
 </body>
 </html>

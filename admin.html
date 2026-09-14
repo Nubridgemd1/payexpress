@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>PayExpress Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b3b8c" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
+<style>
+:root{
+  --blue-dark:#0b3b8c; --blue:#2b7de9; --blue-light:#6fb4f2; --blue-wash:#e7f0fd;
+  --ink:#0d1b2e; --body:#3c4a5e; --muted:#697788;
+  --ground:#e8f0fc; --card:#ffffff; --card2:#f4f8fe; --line:#dde7f5; --line2:#c9d8ee;
+  --good:#12915a; --good-w:#e4f4ec; --warn:#b5730c; --warn-w:#fbefd9; --bad:#c02b2b; --bad-w:#fbe8e8; --slate:#5b6b80; --slate-w:#eef2f7;
+  --shadow:0 1px 2px rgba(11,59,140,.06),0 8px 26px rgba(11,59,140,.07);
+  --r:16px; --r-sm:10px;
+  --disp:"Sora",system-ui,sans-serif; --sans:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --blue-dark:#5aa0f5;--blue:#3f8ef0;--blue-light:#7bb8f7;--blue-wash:#122a4d;
+  --ink:#eaf1fb;--body:#b6c6db;--muted:#8598b0;--ground:#08152a;--card:#0f2440;--card2:#0c1e37;--line:#1c355a;--line2:#274674;
+  --good:#3fbd7f;--good-w:#0f2e22;--warn:#d59433;--warn-w:#33280f;--bad:#ef6b6b;--bad-w:#37191b;--slate:#8fa3bd;--slate-w:#13233c;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.34);
+}}
+:root[data-theme="dark"]{
+  --blue-dark:#5aa0f5;--blue:#3f8ef0;--blue-light:#7bb8f7;--blue-wash:#122a4d;
+  --ink:#eaf1fb;--body:#b6c6db;--muted:#8598b0;--ground:#08152a;--card:#0f2440;--card2:#0c1e37;--line:#1c355a;--line2:#274674;
+  --good:#3fbd7f;--good-w:#0f2e22;--warn:#d59433;--warn-w:#33280f;--bad:#ef6b6b;--bad-w:#37191b;--slate:#8fa3bd;--slate-w:#13233c;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.34);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--body);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,h4{font-family:var(--disp);color:var(--ink);margin:0;font-weight:600;line-height:1.15}
+.mono{font-variant-numeric:tabular-nums}
+button{font-family:inherit}
+a{color:var(--blue)}
+
+.top{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,#0b3b8c,#2b7de9);box-shadow:0 2px 14px rgba(11,59,140,.22);padding-top:env(safe-area-inset-top)}
+.top-in{max-width:1100px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:12px;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:1.12rem;color:#fff;flex:0 0 auto}
+.brand svg{width:32px;height:32px}
+.brand .adm{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#0b3b8c;background:#fff;padding:2px 7px;border-radius:5px;margin-left:2px}
+.tabs{display:flex;gap:2px;margin-left:4px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{border:0;background:transparent;color:rgba(255,255,255,.82);font-size:.9rem;font-weight:600;padding:9px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+.tabs button:hover{color:#fff;background:rgba(255,255,255,.14)}
+.tabs button[aria-selected="true"]{color:#fff;background:rgba(255,255,255,.22)}
+.top .r{display:flex;gap:8px;flex:0 0 auto}
+.ib{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff;height:38px;padding:0 12px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:.85rem;touch-action:manipulation}
+.ib svg{width:16px;height:16px}
+main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+.view{display:none}.view.active{display:block}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--blue-dark)}
+.section-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+h1.pg{font-size:1.5rem;margin-top:3px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:11px;padding:12px 18px;font-size:.92rem;font-weight:700;cursor:pointer;touch-action:manipulation}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-dark)}
+.btn-ghost{background:var(--card);color:var(--ink);border:1.5px solid var(--line2)}
+@media(hover:none){.btn{min-height:46px}.tabs button{min-height:44px}}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:800px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{border:1px solid var(--line);border-radius:var(--r-sm);padding:15px;background:var(--card)}
+.tile .k{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tile .v{font-family:var(--disp);font-weight:700;font-size:1.55rem;margin-top:5px;color:var(--ink)}
+.tile .v.good{color:var(--good)} .tile .v.warn{color:var(--warn)} .tile .v.blue{color:var(--blue-dark)}
+
+/* table */
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:10px 11px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:hover{background:var(--card2)}
+.tag{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-block}
+.t-settled{color:var(--blue-dark);background:var(--blue-wash)}
+.t-processing{color:var(--warn);background:var(--warn-w)}
+.t-paid{color:var(--good);background:var(--good-w)}
+.t-failed{color:var(--bad);background:var(--bad-w)}
+.t-refunded{color:var(--slate);background:var(--slate-w)}
+select.st{font-family:inherit;font-size:.82rem;border:1px solid var(--line2);border-radius:8px;padding:6px 8px;background:var(--card2);color:var(--ink);-webkit-appearance:none;appearance:none}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid var(--line2);background:var(--card);color:var(--body);border-radius:999px;padding:6px 13px;font-size:.82rem;font-weight:600;cursor:pointer;touch-action:manipulation}
+.chip[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+.search{flex:1;min-width:160px;font-family:inherit;font-size:.9rem;border:1px solid var(--line2);border-radius:10px;padding:10px 12px;background:var(--card2);color:var(--ink)}
+
+/* rates form */
+.rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.rate-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:.82rem;font-weight:600;color:var(--body)}
+.field .hint{font-size:.76rem;color:var(--muted)}
+.field input{font-family:var(--disp);font-weight:600;font-size:1.15rem;color:var(--ink);background:var(--card2);border:1px solid var(--line2);border-radius:10px;padding:12px 13px}
+.field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-wash);background:var(--card)}
+@media(max-width:560px){.field input{font-size:16px}}
+.preview{background:linear-gradient(150deg,#0b3b8c,#2b7de9);color:#fff;border-radius:var(--r);padding:20px}
+.preview .k{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:#bcd4f5}
+.preview .big{font-family:var(--disp);font-weight:700;font-size:2rem;margin:4px 0 2px}
+.preview .row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,.16);font-size:.9rem;margin-top:8px}
+
+/* login */
+.gate{position:fixed;inset:0;background:linear-gradient(160deg,#0b3b8c,#123f7d);display:grid;place-items:center;z-index:100;padding:20px}
+.gate .box{background:var(--card);border-radius:18px;padding:30px 26px;width:100%;max-width:360px;box-shadow:0 24px 60px rgba(0,0,0,.35);text-align:center}
+.gate svg{width:46px;height:46px;margin-bottom:8px}
+.gate h2{font-size:1.3rem}.gate p{color:var(--muted);font-size:.88rem;margin:6px 0 16px}
+.gate input{width:100%;font-family:inherit;font-size:1rem;border:1px solid var(--line2);border-radius:10px;padding:12px;text-align:center;letter-spacing:2px;background:var(--card2);color:var(--ink)}
+.gate .err{color:var(--bad);font-size:.82rem;margin-top:8px;min-height:1em}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(150%);background:var(--ink);color:var(--ground);padding:13px 20px;border-radius:11px;box-shadow:var(--shadow);font-weight:600;font-size:.9rem;z-index:70;transition:transform .3s}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="box">
+    <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#0b3b8c"/><path d="M5 16c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M5 21c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#6fb4f2" stroke-width="2.4" stroke-linecap="round"/><path d="M5 26c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#2b7de9" stroke-width="2.4" stroke-linecap="round"/></svg>
+    <h2>PayExpress Admin</h2>
+    <p>Enter your admin passcode to continue.</p>
+    <input id="pass" type="password" placeholder="Passcode" onkeydown="if(event.key==='Enter')login()" />
+    <div class="err" id="gerr"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="login()">Sign in</button>
+  </div>
+</div>
+
+<div class="top">
+  <div class="top-in">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#fff"/><path d="M5 16c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#0b3b8c" stroke-width="2.6" stroke-linecap="round"/><path d="M5 21c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#2b7de9" stroke-width="2.6" stroke-linecap="round"/><path d="M5 26c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0 5.2-3 7.8 0 5.2 3 7.8 0" stroke="#6fb4f2" stroke-width="2.6" stroke-linecap="round"/></svg>
+      PayExpress <span class="adm">Admin</span>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" onclick="go('dashboard')">Dashboard</button>
+      <button role="tab" aria-selected="false" onclick="go('transactions')">Transactions</button>
+      <button role="tab" aria-selected="false" onclick="go('rates')">Rates &amp; Fees</button>
+    </div>
+    <div class="r">
+      <button class="ib" onclick="toggleTheme()" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+      <button class="ib" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="section-h"><div><div class="eyebrow">Overview</div><h1 class="pg">Dashboard</h1></div><button class="btn btn-primary" onclick="go('transactions')">View transactions</button></div>
+    <div class="tiles" id="kpis"></div>
+    <div class="card pad" style="margin-top:16px">
+      <div class="section-h"><h3 style="font-size:1.05rem">Status breakdown</h3></div>
+      <div id="breakdown" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </section>
+
+  <!-- TRANSACTIONS -->
+  <section class="view" id="view-transactions">
+    <div class="section-h"><div><div class="eyebrow">Money movement</div><h1 class="pg">Transactions</h1></div></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+      <div class="chips" id="filters">
+        <button class="chip" aria-pressed="true" onclick="setFilter(this,'all')">All</button>
+        <button class="chip" aria-pressed="false" onclick="setFilter(this,'Settled')">Settled</button>
+        <button class="chip" aria-pressed="false" onclick="setFilter(this,'Processing')">Processing</button>
+        <button class="chip" aria-pressed="false" onclick="setFilter(this,'Paid out')">Paid out</button>
+        <button class="chip" aria-pressed="false" onclick="setFilter(this,'Failed')">Failed</button>
+        <button class="chip" aria-pressed="false" onclick="setFilter(this,'Refunded')">Refunded</button>
+      </div>
+      <input class="search" id="search" placeholder="Search ref or recipient..." oninput="renderTx()">
+    </div>
+    <div class="card">
+      <div class="tablewrap"><table>
+        <thead><tr><th>Reference</th><th>Date</th><th>Sender</th><th>Recipient</th><th>Method</th><th class="n">USD</th><th class="n">NGN</th><th>Status</th><th>Update</th></tr></thead>
+        <tbody id="txBody"></tbody>
+      </table></div>
+    </div>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:10px">Transactions initiated in the customer app appear here automatically. Changing a status updates the record and the dashboard.</p>
+  </section>
+
+  <!-- RATES -->
+  <section class="view" id="view-rates">
+    <div class="section-h"><div><div class="eyebrow">Pricing control</div><h1 class="pg">Rates &amp; Fees</h1></div></div>
+    <div class="rate-grid">
+      <div class="card pad">
+        <div class="field"><label>Base / interbank rate (1 USD = NGN)</label><input id="fBase" type="text" inputmode="decimal" value="1600" oninput="previewRate()"><span class="hint">The wholesale USD/NGN rate you source funds at.</span></div>
+        <div class="field"><label>FX margin (%)</label><input id="fMargin" type="text" inputmode="decimal" value="1.0" oninput="previewRate()"><span class="hint">Your spread. Customer rate = base minus this margin.</span></div>
+        <div class="field"><label>Transfer fee (%)</label><input id="fFeePct" type="text" inputmode="decimal" value="1.5" oninput="previewRate()"></div>
+        <div class="field"><label>Minimum fee (USD)</label><input id="fFeeMin" type="text" inputmode="decimal" value="1.99" oninput="previewRate()"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="saveRates()">Save &amp; publish to app</button>
+      </div>
+      <div>
+        <div class="preview">
+          <div class="k">Customer rate (what senders see)</div>
+          <div class="big mono" id="pRate">1 USD = 1,584 NGN</div>
+          <div class="row"><span>Base rate</span><b class="mono" id="pBase">1,600</b></div>
+          <div class="row"><span>Your FX margin</span><b class="mono" id="pMargin">16 NGN / USD</b></div>
+          <div class="row"><span>FX margin on $1,000</span><b class="mono" id="pMk">16,000 NGN</b></div>
+          <div class="row"><span>Transfer fee</span><b class="mono" id="pFee">1.5% (min $1.99)</b></div>
+        </div>
+        <div class="card pad" style="margin-top:14px;font-size:.86rem;color:var(--body)">
+          <b style="color:var(--ink)">Live link:</b> saved rates publish instantly to the customer app (same device/browser in this prototype). Senders will quote the new customer rate on their next calculation.
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script>
+var PASSCODE="payexpress2026";
+function toggleTheme(){var r=document.documentElement;var cur=r.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");var nx=cur==="dark"?"light":"dark";r.setAttribute("data-theme",nx);try{localStorage.setItem("px-theme",nx)}catch(e){}}
+try{var _t=localStorage.getItem("px-theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show")},2600);}
+
+/* auth */
+function login(){var v=document.getElementById("pass").value;if(v===PASSCODE){try{sessionStorage.setItem("px_admin","1")}catch(e){}document.getElementById("gate").classList.add("hidden");boot();}else{document.getElementById("gerr").textContent="Incorrect passcode.";}}
+function logout(){try{sessionStorage.removeItem("px_admin")}catch(e){}location.reload();}
+try{if(sessionStorage.getItem("px_admin")==="1"){document.getElementById("gate").classList.add("hidden");}}catch(e){}
+
+function go(v){
+  var views=document.querySelectorAll(".view");for(var i=0;i<views.length;i++)views[i].classList.remove("active");
+  var el=document.getElementById("view-"+v);if(el)el.classList.add("active");
+  var tabs=document.querySelectorAll(".tabs button");for(var j=0;j<tabs.length;j++){var oc=tabs[j].getAttribute("onclick")||"";tabs[j].setAttribute("aria-selected",oc.indexOf("go('"+v+"'")===0?"true":"false");}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+var fmt=function(n){return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});};
+var fmtN=function(n){return Math.round(n).toLocaleString("en-US");};
+var num=function(s){return parseFloat(String(s).replace(/[^\d.]/g,""))||0;};
+
+/* transactions store (shared with the app via localStorage px_txns) */
+var SEED=[
+  {ref:"PX-8842013",date:"2026-09-14T10:02:00Z",sender:"John Doe",recipient:"Adaeze Okafor",method:"bank_account",usd:500,ngn:792500,status:"Settled"},
+  {ref:"PX-8839902",date:"2026-09-13T18:20:00Z",sender:"Grace Umeh",recipient:"Emeka Nwosu",method:"mobile_wallet",usd:250,ngn:396250,status:"Paid out"},
+  {ref:"PX-8837781",date:"2026-09-13T14:05:00Z",sender:"Tunde A.",recipient:"Chidi Balogun",method:"bank_account",usd:1200,ngn:1902000,status:"Paid out"},
+  {ref:"PX-8835540",date:"2026-09-12T21:41:00Z",sender:"M. Ibrahim",recipient:"Sarah Bello",method:"cash_pickup",usd:120,ngn:190200,status:"Processing"},
+  {ref:"PX-8833219",date:"2026-09-12T09:15:00Z",sender:"K. Eze",recipient:"Ngozi Ali",method:"bank_account",usd:800,ngn:1268000,status:"Settled"},
+  {ref:"PX-8831007",date:"2026-09-11T16:48:00Z",sender:"D. Peters",recipient:"Femi Johnson",method:"card",usd:60,ngn:95100,status:"Failed"},
+  {ref:"PX-8829884",date:"2026-09-11T11:02:00Z",sender:"A. Sanni",recipient:"Blessing O.",method:"mobile_wallet",usd:340,ngn:538900,status:"Refunded"},
+  {ref:"PX-8827650",date:"2026-09-10T19:30:00Z",sender:"C. Obi",recipient:"Ada Nnaji",method:"bank_account",usd:2000,ngn:3170000,status:"Paid out"}
+];
+function getTx(){try{var a=JSON.parse(localStorage.getItem("px_txns")||"null");if(!a||!a.length){localStorage.setItem("px_txns",JSON.stringify(SEED));return SEED.slice();}return a;}catch(e){return SEED.slice();}}
+function saveTx(a){try{localStorage.setItem("px_txns",JSON.stringify(a))}catch(e){}}
+var STATUSES=["Settled","Processing","Paid out","Failed","Refunded"];
+function cls(s){return "t-"+String(s).toLowerCase().replace(/ /g,"");}
+var filter="all";
+function setFilter(el,f){var c=document.querySelectorAll("#filters .chip");for(var i=0;i<c.length;i++)c[i].setAttribute("aria-pressed","false");el.setAttribute("aria-pressed","true");filter=f;renderTx();}
+function prettyMethod(m){return ({bank_account:"Bank",mobile_wallet:"Wallet",cash_pickup:"Cash",card:"Card"})[m]||m;}
+function renderTx(){
+  var all=getTx();var q=(document.getElementById("search").value||"").toLowerCase();
+  var rows="";
+  for(var i=0;i<all.length;i++){var t=all[i];
+    if(filter!=="all" && t.status!==filter) continue;
+    if(q && (t.ref+" "+t.recipient+" "+(t.sender||"")).toLowerCase().indexOf(q)<0) continue;
+    var d=new Date(t.date); var ds=isNaN(d)?t.date:d.toLocaleDateString("en-US",{month:"short",day:"numeric"})+" "+d.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+    var opts="";for(var k=0;k<STATUSES.length;k++){opts+='<option'+(STATUSES[k]===t.status?" selected":"")+'>'+STATUSES[k]+'</option>';}
+    rows+='<tr><td class="mono">'+t.ref+'</td><td>'+ds+'</td><td>'+(t.sender||"-")+'</td><td>'+t.recipient+'</td><td>'+prettyMethod(t.method)+'</td><td class="n mono">'+fmt(t.usd)+'</td><td class="n mono">'+fmtN(t.ngn)+'</td><td><span class="tag '+cls(t.status)+'">'+t.status+'</span></td><td><select class="st" onchange="setStatus(\''+t.ref+'\',this.value)">'+opts+'</select></td></tr>';
+  }
+  document.getElementById("txBody").innerHTML=rows||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No transactions match.</td></tr>';
+}
+function setStatus(ref,status){var a=getTx();for(var i=0;i<a.length;i++){if(a[i].ref===ref){a[i].status=status;break;}}saveTx(a);renderTx();renderKpis();toast(ref+" set to "+status);}
+
+/* KPIs */
+function renderKpis(){
+  var a=getTx();var vol=0,cnt=a.length,pending=0,marginNgn=0;
+  var cfg=getCfg();var counts={};
+  for(var i=0;i<a.length;i++){var t=a[i];vol+=Number(t.usd)||0;
+    counts[t.status]=(counts[t.status]||0)+1;
+    if(t.status==="Settled"||t.status==="Processing")pending+=Number(t.usd)||0;
+    marginNgn += (Number(t.usd)||0)*(cfg.base - cfg.rate);
+  }
+  document.getElementById("kpis").innerHTML=
+    tile("Total volume",fmt(vol),"blue")+
+    tile("Transfers",cnt,"")+
+    tile("Awaiting payout",fmt(pending),"warn")+
+    tile("Est. FX margin","NGN "+fmtN(marginNgn),"good");
+  var order=["Settled","Processing","Paid out","Failed","Refunded"];var bd="";
+  for(var j=0;j<order.length;j++){var s=order[j];var n=counts[s]||0;var pct=cnt?Math.round(n/cnt*100):0;
+    bd+='<div style="display:grid;grid-template-columns:110px 1fr 40px;gap:10px;align-items:center;font-size:.86rem"><span class="tag '+cls(s)+'">'+s+'</span><div style="height:8px;background:var(--card2);border:1px solid var(--line);border-radius:999px;overflow:hidden"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--blue),var(--blue-light))"></i></div><span class="mono" style="text-align:right;color:var(--muted)">'+n+'</span></div>';
+  }
+  document.getElementById("breakdown").innerHTML=bd;
+}
+function tile(k,v,c){return '<div class="tile"><div class="k">'+k+'</div><div class="v '+c+'">'+v+'</div></div>';}
+
+/* rates */
+function getCfg(){try{var c=JSON.parse(localStorage.getItem("px_cfg")||"null");if(c)return c;}catch(e){}return {base:1600,margin:1.0,rate:1584,feePct:1.5,feeMin:1.99};}
+function previewRate(){
+  var base=num(document.getElementById("fBase").value);var margin=num(document.getElementById("fMargin").value);
+  var feePct=num(document.getElementById("fFeePct").value);var feeMin=num(document.getElementById("fFeeMin").value);
+  var rate=Math.round(base*(1-margin/100));var perUsd=base-rate;
+  document.getElementById("pRate").textContent="1 USD = "+fmtN(rate)+" NGN";
+  document.getElementById("pBase").textContent=fmtN(base);
+  document.getElementById("pMargin").textContent=fmtN(perUsd)+" NGN / USD";
+  document.getElementById("pMk").textContent=fmtN(perUsd*1000)+" NGN";
+  document.getElementById("pFee").textContent=feePct+"% (min "+fmt(feeMin)+")";
+  return {base:base,margin:margin,rate:rate,feePct:feePct,feeMin:feeMin};
+}
+function saveRates(){var cfg=previewRate();try{localStorage.setItem("px_cfg",JSON.stringify(cfg))}catch(e){}renderKpis();toast("Rates saved and published to the app");}
+function loadRatesForm(){var c=getCfg();document.getElementById("fBase").value=c.base;document.getElementById("fMargin").value=c.margin;document.getElementById("fFeePct").value=c.feePct;document.getElementById("fFeeMin").value=c.feeMin;previewRate();}
+
+function boot(){ renderKpis(); renderTx(); loadRatesForm(); }
+boot();
+</script>
+</body>
+</html>
