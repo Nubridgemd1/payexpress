@@ -177,6 +177,17 @@ tbody tr:last-child td{border-bottom:0}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(150%);background:var(--ink);color:var(--ground);padding:13px 20px;border-radius:11px;box-shadow:var(--shadow-lg);font-weight:600;font-size:.9rem;z-index:70;transition:transform .3s}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .hidden{display:none}
+/* ---- admin sub-tabs + responsive stats ---- */
+.subtabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 0 16px}
+.subtabs::-webkit-scrollbar{display:none}
+.subtabs button{flex:0 0 auto;border:1px solid var(--line2);background:var(--card);color:var(--body);font-family:var(--sans);font-weight:600;font-size:.88rem;padding:9px 15px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:40px;touch-action:manipulation}
+.subtabs button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.astats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-radius:var(--r-sm);overflow:hidden}
+.astats .b{background:var(--card);padding:13px 14px}
+.astats .k{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.astats .v{font-family:var(--disp);font-weight:700;font-size:1.05rem;margin-top:3px;color:var(--ink)}
+@media(max-width:620px){.astats{grid-template-columns:1fr 1fr}}
+#adminRateBody input{font-size:16px;padding:9px 10px}
 .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:var(--r-sm);overflow:hidden;margin-top:16px}
 .mini .b{background:var(--card);padding:13px 14px}
 .mini .k{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
@@ -529,44 +540,77 @@ tbody tr:last-child td{border-bottom:0}
         <button class="btn btn-ghost" onclick="adminLogout()">Sign out</button>
       </div>
 
-      <!-- report period + stats -->
-      <div class="card pad">
-        <div class="section-h" style="margin-bottom:10px"><h3 style="font-size:1.05rem">Report</h3>
-          <div style="display:flex;gap:6px;flex-wrap:wrap" id="periodBtns">
-            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('day',this)">Daily</button>
-            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('week',this)">Weekly</button>
-            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('month',this)">Monthly</button>
-            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('year',this)">Yearly</button>
-            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('all',this)">All time</button>
+      <div class="subtabs" id="adminSub">
+        <button aria-selected="true" onclick="adminTab('reports',this)">Reports</button>
+        <button aria-selected="false" onclick="adminTab('txns',this)">Transactions</button>
+        <button aria-selected="false" onclick="adminTab('rates',this)">Rates</button>
+        <button aria-selected="false" onclick="adminTab('settings',this)">Settings</button>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="atab" id="atab-reports">
+        <div class="card pad">
+          <div class="section-h" style="margin-bottom:10px"><h3 style="font-size:1.05rem">Report period</h3>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="periodBtns">
+              <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('day',this)">Daily</button>
+              <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('week',this)">Weekly</button>
+              <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('month',this)">Monthly</button>
+              <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('year',this)">Year to date</button>
+              <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('all',this)">All time</button>
+            </div>
+          </div>
+          <div class="astats" id="adminStats"></div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+            <button class="btn btn-ghost" style="padding:9px 14px" onclick="exportTxnsCSV()">Export transactions (CSV)</button>
+            <button class="btn btn-ghost" style="padding:9px 14px" onclick="seedDemoTxns()">Add demo transactions</button>
           </div>
         </div>
-        <div class="mini" id="adminStats" style="grid-template-columns:repeat(4,1fr)"></div>
-        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-          <button class="btn btn-ghost" style="padding:9px 14px" onclick="exportTxnsCSV()">Export transactions (CSV)</button>
-          <button class="btn btn-ghost" style="padding:9px 14px" onclick="seedDemoTxns()">Add demo transactions</button>
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="atab hidden" id="atab-txns">
+        <div class="card pad"><div style="overflow-x:auto"><table>
+          <thead><tr><th>Date</th><th>Reference</th><th>Recipient</th><th>Country</th><th class="n">Sent (USD)</th><th class="n">Payout</th><th style="text-align:right">Status</th></tr></thead>
+          <tbody id="adminTxnBody"></tbody>
+        </table></div></div>
+      </div>
+
+      <!-- RATES -->
+      <div class="atab hidden" id="atab-rates">
+        <div class="section-h" style="margin-bottom:8px"><div><div class="eyebrow">FX control</div><h2 style="font-size:1.25rem;margin-top:3px">Exchange rates</h2></div>
+          <button class="btn btn-primary" style="padding:9px 14px" onclick="saveRatesForm()">Save rates</button>
+        </div>
+        <p class="hint" style="color:var(--muted);font-size:.86rem;margin:-2px 0 12px">Rate = units of the local currency per 1 USD. Changes apply immediately to the send calculator.</p>
+        <div class="card pad"><div style="overflow-x:auto"><table>
+          <thead><tr><th>Country</th><th>Currency</th><th class="n">Rate (per 1 USD)</th></tr></thead>
+          <tbody id="adminRateBody"></tbody>
+        </table></div></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="atab hidden" id="atab-settings">
+        <div class="card pad" style="max-width:520px">
+          <h3 style="font-size:1.05rem;margin-bottom:4px">Change password</h3>
+          <p class="hint" style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Choose a new admin passcode (minimum 6 characters).</p>
+          <div class="field"><label>Current password</label><input id="pw-cur" type="password" autocomplete="current-password"></div>
+          <div class="field"><label>New password</label><input id="pw-new" type="password" autocomplete="new-password"></div>
+          <div class="field"><label>Confirm new password</label><input id="pw-conf" type="password" autocomplete="new-password"></div>
+          <button class="btn btn-primary" style="margin-top:14px" onclick="changePassword()">Update password</button>
+        </div>
+        <div class="card pad" style="max-width:520px;margin-top:16px">
+          <h3 style="font-size:1.05rem;margin-bottom:4px">Contact information</h3>
+          <p class="hint" style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Shown in the site footer. Update support details here.</p>
+          <div class="field"><label>Business name</label><input id="ct-name"></div>
+          <div class="field"><label>Support email</label><input id="ct-email" type="email"></div>
+          <div class="field"><label>Support phone</label><input id="ct-phone" inputmode="tel"></div>
+          <div class="field"><label>Address</label><input id="ct-addr"></div>
+          <button class="btn btn-primary" style="margin-top:14px" onclick="saveContact()">Save contact info</button>
         </div>
       </div>
-
-      <!-- transactions -->
-      <div class="section-h" style="margin-top:24px"><div><div class="eyebrow">Ledger</div><h2 style="font-size:1.3rem;margin-top:3px">Transactions</h2></div></div>
-      <div class="card pad"><div style="overflow-x:auto"><table>
-        <thead><tr><th>Date</th><th>Reference</th><th>Recipient</th><th>Country</th><th class="n">Sent (USD)</th><th class="n">Payout</th><th style="text-align:right">Status</th></tr></thead>
-        <tbody id="adminTxnBody"></tbody>
-      </table></div></div>
-
-      <!-- exchange rates -->
-      <div class="section-h" style="margin-top:24px"><div><div class="eyebrow">FX control</div><h2 style="font-size:1.3rem;margin-top:3px">Exchange rates</h2></div>
-        <button class="btn btn-primary" style="padding:9px 14px" onclick="saveRatesForm()">Save rates</button>
-      </div>
-      <p class="hint" style="color:var(--muted);font-size:.86rem;margin:-6px 0 12px">Rate = units of the local currency per 1 USD. Changes apply immediately to the send calculator for every customer on this device.</p>
-      <div class="card pad"><div style="overflow-x:auto"><table>
-        <thead><tr><th>Country</th><th>Currency</th><th class="n">Rate (per 1 USD)</th></tr></thead>
-        <tbody id="adminRateBody"></tbody>
-      </table></div></div>
     </div>
   </section>
 
-  <div class="foot">PayExpress is a product prototype for demonstration. No real accounts, cards, or funds are processed. · <a href="#" onclick="go('admin');return false">Admin</a></div>
+  <div class="foot"><span id="footContact" style="display:block;color:var(--ink);font-weight:600;margin-bottom:4px"></span>PayExpress is a product prototype for demonstration. No real accounts, cards, or funds are processed. · <a href="#" onclick="go('admin');return false">Admin</a></div>
 </main>
 <nav class="botnav" role="tablist" aria-label="Sections">
   <button aria-selected="true" onclick="go('send')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg><span>Send</span></button>
@@ -724,11 +768,20 @@ function submitKyc(){
 }
 
 /* ---- Admin portal ---- */
-var ADMIN_PASS="payexpress2026";
+var ADMIN_PASS_DEFAULT="payexpress2026";
 var adminPeriod="month";
+var adminActiveTab="reports";
+function getAdminPass(){try{return localStorage.getItem("px_admin_pass")||ADMIN_PASS_DEFAULT;}catch(e){return ADMIN_PASS_DEFAULT;}}
 function adminIsUnlocked(){try{return sessionStorage.getItem("px_admin")==="1";}catch(e){return false;}}
-function adminLogin(){var el=document.getElementById("adminPass");var p=el?el.value:"";if(p===ADMIN_PASS){try{sessionStorage.setItem("px_admin","1");}catch(e){}renderAdmin();toast("Signed in to admin");}else{toast("Incorrect passcode");}}
+function adminLogin(){var el=document.getElementById("adminPass");var p=el?el.value:"";if(p===getAdminPass()){try{sessionStorage.setItem("px_admin","1");}catch(e){}renderAdmin();toast("Signed in to admin");}else{toast("Incorrect passcode");}}
 function adminLogout(){try{sessionStorage.removeItem("px_admin");}catch(e){}renderAdmin();}
+function adminTab(name,btn){adminActiveTab=name;var tabs=["reports","txns","rates","settings"];for(var i=0;i<tabs.length;i++){var el=document.getElementById("atab-"+tabs[i]);if(el)el.classList.toggle("hidden",tabs[i]!==name);}var bs=document.querySelectorAll("#adminSub button");for(var j=0;j<bs.length;j++)bs[j].setAttribute("aria-selected",bs[j]===btn?"true":"false");}
+function changePassword(){var cur=document.getElementById("pw-cur").value,nw=document.getElementById("pw-new").value,cf=document.getElementById("pw-conf").value;if(cur!==getAdminPass()){toast("Current password is incorrect");return;}if((nw||"").length<6){toast("New password must be at least 6 characters");return;}if(nw!==cf){toast("New passwords do not match");return;}try{localStorage.setItem("px_admin_pass",nw);}catch(e){}document.getElementById("pw-cur").value="";document.getElementById("pw-new").value="";document.getElementById("pw-conf").value="";toast("Password updated");}
+var DEFAULT_CONTACT={name:"PayExpress",email:"support@payexpress.org",phone:"",addr:""};
+function getContact(){try{var c=JSON.parse(localStorage.getItem("px_contact")||"null");return c?c:DEFAULT_CONTACT;}catch(e){return DEFAULT_CONTACT;}}
+function saveContact(){var c={name:(document.getElementById("ct-name").value||""),email:(document.getElementById("ct-email").value||""),phone:(document.getElementById("ct-phone").value||""),addr:(document.getElementById("ct-addr").value||"")};try{localStorage.setItem("px_contact",JSON.stringify(c));}catch(e){}renderFooterContact();toast("Contact info saved");}
+function fillContactForm(){var c=getContact();var m={"ct-name":c.name,"ct-email":c.email,"ct-phone":c.phone,"ct-addr":c.addr};for(var k in m){var el=document.getElementById(k);if(el)el.value=m[k]||"";}}
+function renderFooterContact(){var el=document.getElementById("footContact");if(!el)return;var c=getContact();var parts=[];if(c.email)parts.push(c.email);if(c.phone)parts.push(c.phone);el.textContent=parts.length?("Contact: "+parts.join(" · ")):"";}
 function getTxns(){try{return JSON.parse(localStorage.getItem("px_txns")||"[]");}catch(e){return [];}}
 function periodStart(p){var n=new Date();if(p==="day"){return new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime();}if(p==="week"){var d=new Date(n.getFullYear(),n.getMonth(),n.getDate());var day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return d.getTime();}if(p==="month"){return new Date(n.getFullYear(),n.getMonth(),1).getTime();}if(p==="year"){return new Date(n.getFullYear(),0,1).getTime();}return 0;}
 function setPeriod(p,btn){adminPeriod=p;var bs=document.querySelectorAll("#periodBtns .btn");for(var i=0;i<bs.length;i++){bs[i].className="btn btn-ghost";bs[i].style.padding="8px 12px";}if(btn){btn.className="btn btn-primary";btn.style.padding="8px 12px";}renderAdminStats();}
@@ -773,10 +826,16 @@ function seedDemoTxns(){
   renderAdmin();toast("Added 12 demo transactions");
 }
 function renderAdmin(){
+  renderFooterContact();
   var unlocked=adminIsUnlocked();var gate=document.getElementById("adminGate"),panel=document.getElementById("adminPanel");
   if(gate)gate.classList.toggle("hidden",unlocked);
   if(panel)panel.classList.toggle("hidden",!unlocked);
-  if(unlocked){renderAdminStats();renderAdminTxns();renderRateEditor();var pb=document.querySelectorAll("#periodBtns .btn");for(var i=0;i<pb.length;i++){if((pb[i].getAttribute("onclick")||"").indexOf("'"+adminPeriod+"'")>=0){pb[i].className="btn btn-primary";pb[i].style.padding="8px 12px";}}}
+  if(unlocked){
+    renderAdminStats();renderAdminTxns();renderRateEditor();fillContactForm();
+    var pb=document.querySelectorAll("#periodBtns .btn");for(var i=0;i<pb.length;i++){if((pb[i].getAttribute("onclick")||"").indexOf("'"+adminPeriod+"'")>=0){pb[i].className="btn btn-primary";pb[i].style.padding="8px 12px";}}
+    var tabs=["reports","txns","rates","settings"];for(var t=0;t<tabs.length;t++){var el=document.getElementById("atab-"+tabs[t]);if(el)el.classList.toggle("hidden",tabs[t]!==adminActiveTab);}
+    var bs=document.querySelectorAll("#adminSub button");for(var b=0;b<bs.length;b++){bs[b].setAttribute("aria-selected",(bs[b].getAttribute("onclick")||"").indexOf("'"+adminActiveTab+"'")>=0?"true":"false");}
+  }
 }
 function initAdmin(){renderAdmin();}
 
