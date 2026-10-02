@@ -270,11 +270,11 @@ tbody tr:last-child td{border-bottom:0}
       <div class="card calc">
         <div class="fx-row">
           <div style="flex:1"><div class="lbl">You send</div><input id="sendAmt" type="text" inputmode="decimal" value="500.00" oninput="calc()"></div>
-          <span class="cur"><span class="flag" style="background:linear-gradient(180deg,#b22234 0 33%,#fff 33% 66%,#3c3b6e 66%)"></span> USD</span>
+          <span class="cur"><span class="flag" title="United States" style="background:linear-gradient(#3c3b6e,#3c3b6e) top left/42% 54% no-repeat,repeating-linear-gradient(180deg,#b22234 0 2px,#fff 2px 4px)"></span> USD</span>
         </div>
         <div class="fx-row">
           <div style="flex:1"><div class="lbl">They receive</div><div class="amt mono" id="recvAmt">0</div></div>
-          <span class="cur"><span class="flag" style="background:linear-gradient(90deg,#008751 0 33%,#fff 33% 66%,#008751 66%)"></span> NGN</span>
+          <span class="cur"><span class="flag" title="Nigeria" style="background:linear-gradient(90deg,#008751 0 33%,#fff 33% 66%,#008751 66%)"></span> NGN</span>
         </div>
         <div class="rate-line"><span>Exchange rate</span><b class="mono" id="rateLine">1 USD = 1,585 NGN</b></div>
         <div class="rate-line"><span>Transfer fee</span><b class="mono" id="feeLine">$7.50</b></div>
