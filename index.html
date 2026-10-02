@@ -178,9 +178,9 @@ tbody tr:last-child td{border-bottom:0}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .hidden{display:none}
 /* ---- admin sub-tabs + responsive stats ---- */
-.subtabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 0 16px}
-.subtabs::-webkit-scrollbar{display:none}
+.subtabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
 .subtabs button{flex:0 0 auto;border:1px solid var(--line2);background:var(--card);color:var(--body);font-family:var(--sans);font-weight:600;font-size:.88rem;padding:9px 15px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:40px;touch-action:manipulation}
+@media(max-width:620px){.subtabs button{flex:1 1 auto;text-align:center}}
 .subtabs button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
 .astats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-radius:var(--r-sm);overflow:hidden}
 .astats .b{background:var(--card);padding:13px 14px}
@@ -541,10 +541,11 @@ tbody tr:last-child td{border-bottom:0}
       </div>
 
       <div class="subtabs" id="adminSub">
-        <button aria-selected="true" onclick="adminTab('reports',this)">Reports</button>
+        <button aria-selected="true" onclick="adminTab('reports',this)">Dashboard</button>
         <button aria-selected="false" onclick="adminTab('txns',this)">Transactions</button>
-        <button aria-selected="false" onclick="adminTab('rates',this)">Rates</button>
-        <button aria-selected="false" onclick="adminTab('settings',this)">Settings</button>
+        <button aria-selected="false" onclick="adminTab('rates',this)">Rates &amp; Fees</button>
+        <button aria-selected="false" onclick="adminTab('contact',this)">Contact</button>
+        <button aria-selected="false" onclick="adminTab('login',this)">Login</button>
       </div>
 
       <!-- REPORTS -->
@@ -575,29 +576,21 @@ tbody tr:last-child td{border-bottom:0}
         </table></div></div>
       </div>
 
-      <!-- RATES -->
+      <!-- RATES & FEES -->
       <div class="atab hidden" id="atab-rates">
-        <div class="section-h" style="margin-bottom:8px"><div><div class="eyebrow">FX control</div><h2 style="font-size:1.25rem;margin-top:3px">Exchange rates</h2></div>
+        <div class="section-h" style="margin-bottom:8px"><div><div class="eyebrow">FX control</div><h2 style="font-size:1.25rem;margin-top:3px">Rates &amp; Fees</h2></div>
           <button class="btn btn-primary" style="padding:9px 14px" onclick="saveRatesForm()">Save rates</button>
         </div>
-        <p class="hint" style="color:var(--muted);font-size:.86rem;margin:-2px 0 12px">Rate = units of the local currency per 1 USD. Changes apply immediately to the send calculator.</p>
+        <p class="hint" style="color:var(--muted);font-size:.86rem;margin:-2px 0 12px">Rate = units of the local currency per 1 USD. Changes apply immediately to the send calculator. Transfer fee: <b>none</b> (customers pay only the amount they send).</p>
         <div class="card pad"><div style="overflow-x:auto"><table>
           <thead><tr><th>Country</th><th>Currency</th><th class="n">Rate (per 1 USD)</th></tr></thead>
           <tbody id="adminRateBody"></tbody>
         </table></div></div>
       </div>
 
-      <!-- SETTINGS -->
-      <div class="atab hidden" id="atab-settings">
-        <div class="card pad" style="max-width:520px">
-          <h3 style="font-size:1.05rem;margin-bottom:4px">Change password</h3>
-          <p class="hint" style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Choose a new admin passcode (minimum 6 characters).</p>
-          <div class="field"><label>Current password</label><input id="pw-cur" type="password" autocomplete="current-password"></div>
-          <div class="field"><label>New password</label><input id="pw-new" type="password" autocomplete="new-password"></div>
-          <div class="field"><label>Confirm new password</label><input id="pw-conf" type="password" autocomplete="new-password"></div>
-          <button class="btn btn-primary" style="margin-top:14px" onclick="changePassword()">Update password</button>
-        </div>
-        <div class="card pad" style="max-width:520px;margin-top:16px">
+      <!-- CONTACT -->
+      <div class="atab hidden" id="atab-contact">
+        <div class="card pad" style="max-width:560px">
           <h3 style="font-size:1.05rem;margin-bottom:4px">Contact information</h3>
           <p class="hint" style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Shown in the site footer. Update support details here.</p>
           <div class="field"><label>Business name</label><input id="ct-name"></div>
@@ -605,6 +598,18 @@ tbody tr:last-child td{border-bottom:0}
           <div class="field"><label>Support phone</label><input id="ct-phone" inputmode="tel"></div>
           <div class="field"><label>Address</label><input id="ct-addr"></div>
           <button class="btn btn-primary" style="margin-top:14px" onclick="saveContact()">Save contact info</button>
+        </div>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="atab hidden" id="atab-login">
+        <div class="card pad" style="max-width:560px">
+          <h3 style="font-size:1.05rem;margin-bottom:4px">Update admin login</h3>
+          <p class="hint" style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Change the admin passcode (minimum 6 characters).</p>
+          <div class="field"><label>Current password</label><input id="pw-cur" type="password" autocomplete="current-password"></div>
+          <div class="field"><label>New password</label><input id="pw-new" type="password" autocomplete="new-password"></div>
+          <div class="field"><label>Confirm new password</label><input id="pw-conf" type="password" autocomplete="new-password"></div>
+          <button class="btn btn-primary" style="margin-top:14px" onclick="changePassword()">Update password</button>
         </div>
       </div>
     </div>
@@ -775,7 +780,7 @@ function getAdminPass(){try{return localStorage.getItem("px_admin_pass")||ADMIN_
 function adminIsUnlocked(){try{return sessionStorage.getItem("px_admin")==="1";}catch(e){return false;}}
 function adminLogin(){var el=document.getElementById("adminPass");var p=el?el.value:"";if(p===getAdminPass()){try{sessionStorage.setItem("px_admin","1");}catch(e){}renderAdmin();toast("Signed in to admin");}else{toast("Incorrect passcode");}}
 function adminLogout(){try{sessionStorage.removeItem("px_admin");}catch(e){}renderAdmin();}
-function adminTab(name,btn){adminActiveTab=name;var tabs=["reports","txns","rates","settings"];for(var i=0;i<tabs.length;i++){var el=document.getElementById("atab-"+tabs[i]);if(el)el.classList.toggle("hidden",tabs[i]!==name);}var bs=document.querySelectorAll("#adminSub button");for(var j=0;j<bs.length;j++)bs[j].setAttribute("aria-selected",bs[j]===btn?"true":"false");}
+function adminTab(name,btn){adminActiveTab=name;var tabs=["reports","txns","rates","contact","login"];for(var i=0;i<tabs.length;i++){var el=document.getElementById("atab-"+tabs[i]);if(el)el.classList.toggle("hidden",tabs[i]!==name);}var bs=document.querySelectorAll("#adminSub button");for(var j=0;j<bs.length;j++)bs[j].setAttribute("aria-selected",bs[j]===btn?"true":"false");}
 function changePassword(){var cur=document.getElementById("pw-cur").value,nw=document.getElementById("pw-new").value,cf=document.getElementById("pw-conf").value;if(cur!==getAdminPass()){toast("Current password is incorrect");return;}if((nw||"").length<6){toast("New password must be at least 6 characters");return;}if(nw!==cf){toast("New passwords do not match");return;}try{localStorage.setItem("px_admin_pass",nw);}catch(e){}document.getElementById("pw-cur").value="";document.getElementById("pw-new").value="";document.getElementById("pw-conf").value="";toast("Password updated");}
 var DEFAULT_CONTACT={name:"PayExpress",email:"support@payexpress.org",phone:"",addr:""};
 function getContact(){try{var c=JSON.parse(localStorage.getItem("px_contact")||"null");return c?c:DEFAULT_CONTACT;}catch(e){return DEFAULT_CONTACT;}}
@@ -833,7 +838,7 @@ function renderAdmin(){
   if(unlocked){
     renderAdminStats();renderAdminTxns();renderRateEditor();fillContactForm();
     var pb=document.querySelectorAll("#periodBtns .btn");for(var i=0;i<pb.length;i++){if((pb[i].getAttribute("onclick")||"").indexOf("'"+adminPeriod+"'")>=0){pb[i].className="btn btn-primary";pb[i].style.padding="8px 12px";}}
-    var tabs=["reports","txns","rates","settings"];for(var t=0;t<tabs.length;t++){var el=document.getElementById("atab-"+tabs[t]);if(el)el.classList.toggle("hidden",tabs[t]!==adminActiveTab);}
+    var tabs=["reports","txns","rates","contact","login"];for(var t=0;t<tabs.length;t++){var el=document.getElementById("atab-"+tabs[t]);if(el)el.classList.toggle("hidden",tabs[t]!==adminActiveTab);}
     var bs=document.querySelectorAll("#adminSub button");for(var b=0;b<bs.length;b++){bs[b].setAttribute("aria-selected",(bs[b].getAttribute("onclick")||"").indexOf("'"+adminActiveTab+"'")>=0?"true":"false");}
   }
 }
