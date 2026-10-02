@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>PayExpress</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="PayExpress - fast, low-cost money transfers to Nigeria, with card services and easy IMTO integration." />
+<meta name="description" content="PayExpress - fast, low-cost money transfers worldwide, with card services and easy payout-partner integration." />
 <meta name="theme-color" content="#0b3b8c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="PayExpress" />
@@ -239,6 +239,7 @@ tbody tr:last-child td{border-bottom:0}
       <button role="tab" aria-selected="false" onclick="go('recipients')">Recipients</button>
       <button role="tab" aria-selected="false" onclick="go('verify')">Verify</button>
       <button role="tab" aria-selected="false" onclick="go('partners')">For partners</button>
+      <button role="tab" aria-selected="false" onclick="go('admin')">Admin</button>
     </div>
     <span class="spacer"></span>
     <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">
@@ -252,9 +253,9 @@ tbody tr:last-child td{border-bottom:0}
   <section class="view active" id="view-send">
     <div class="send-grid">
       <div class="hero-copy">
-        <div class="eyebrow">Send money to Nigeria</div>
-        <h1>Money home in minutes, at a fair rate.</h1>
-        <p class="sub">Pay with your card, we deliver Naira straight to their bank account, card, wallet, or cash pickup. Great rates, clear fees, no surprises.</p>
+        <div class="eyebrow">Send money globally</div>
+        <h1>Money across borders in minutes, at a fair rate.</h1>
+        <p class="sub">Pay with your card, we deliver straight to their bank account, card, wallet, or cash pickup in 20+ countries. Great rates, clear fees, no surprises.</p>
         <div class="trust">
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg> Bank-grade security</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M5 12l7 7 7-7"/></svg> Same-day payout</span>
@@ -272,9 +273,12 @@ tbody tr:last-child td{border-bottom:0}
           <div style="flex:1"><div class="lbl">You send</div><input id="sendAmt" type="text" inputmode="decimal" value="500.00" oninput="calc()"></div>
           <span class="cur"><span class="flag" title="United States" style="background:linear-gradient(#3c3b6e,#3c3b6e) top left/42% 54% no-repeat,repeating-linear-gradient(180deg,#b22234 0 2px,#fff 2px 4px)"></span> USD</span>
         </div>
-        <div class="fx-row">
+        <div class="field" style="margin-top:12px"><label>Send to</label>
+          <select id="destCountry" onchange="onDest()"></select>
+        </div>
+        <div class="fx-row" style="margin-top:10px">
           <div style="flex:1"><div class="lbl">They receive</div><div class="amt mono" id="recvAmt">0</div></div>
-          <span class="cur"><span class="flag" title="Nigeria" style="background:linear-gradient(90deg,#008751 0 33%,#fff 33% 66%,#008751 66%)"></span> NGN</span>
+          <span class="cur"><span id="recvFlag" style="font-size:1.05rem;line-height:1">🇳🇬</span> <span id="recvCur">NGN</span></span>
         </div>
         <div class="rate-line"><span>Exchange rate</span><b class="mono" id="rateLine">1 USD = 1,585 NGN</b></div>
         <div class="rate-line"><span>Transfer fee</span><b class="mono" id="feeLine">$7.50</b></div>
@@ -289,7 +293,7 @@ tbody tr:last-child td{border-bottom:0}
         </div>
 
         <div class="field"><label>Recipient</label>
-          <select id="recip"><option>Adaeze Okafor - GTBank ****4471</option><option>Emeka Nwosu - Access Bank ****2093</option><option>+ Add new recipient</option></select>
+          <select id="recip"><option>Test Recipient One - Test Bank ****1001</option><option>Test Recipient Two - Test Bank ****1002</option><option>+ Add new recipient</option></select>
         </div>
 
         <div class="pay-chip">
@@ -337,7 +341,7 @@ tbody tr:last-child td{border-bottom:0}
         <div class="type">Local - Naira debit</div>
         <div class="chip"></div>
         <div class="num mono">5399  02**  ****  4471</div>
-        <div class="row"><span>ADAEZE OKAFOR</span><span>NGN</span></div>
+        <div class="row"><span>TEST CARDHOLDER</span><span>NGN</span></div>
       </div>
       <div class="paycard intl">
         <svg class="waves-bg" viewBox="0 0 300 170" preserveAspectRatio="none"><path d="M0 120c40-30 80-30 120 0s80 30 120 0 60-25 60-25" stroke="#fff" stroke-width="3" fill="none"/><path d="M0 140c40-30 80-30 120 0s80 30 120 0 60-25 60-25" stroke="#fff" stroke-width="3" fill="none"/></svg>
@@ -345,7 +349,7 @@ tbody tr:last-child td{border-bottom:0}
         <div class="type">International - USD virtual</div>
         <div class="chip"></div>
         <div class="num mono">4147  88**  ****  9920</div>
-        <div class="row"><span>ADAEZE OKAFOR</span><span>USD</span></div>
+        <div class="row"><span>TEST CARDHOLDER</span><span>USD</span></div>
       </div>
     </div>
     <div class="feat" style="margin-top:16px">
@@ -366,17 +370,18 @@ tbody tr:last-child td{border-bottom:0}
       <div style="overflow-x:auto"><table>
         <thead><tr><th>Name</th><th>Bank</th><th>Account</th><th style="text-align:right">Last sent</th></tr></thead>
         <tbody>
-          <tr><td>Adaeze Okafor</td><td>GTBank</td><td class="mono">****4471</td><td class="n">Sep 12</td></tr>
-          <tr><td>Emeka Nwosu</td><td>Access Bank</td><td class="mono">****2093</td><td class="n">Aug 30</td></tr>
-          <tr><td>Chidi Balogun</td><td>Zenith Bank</td><td class="mono">****7715</td><td class="n">Aug 09</td></tr>
+          <tr><td>Test Recipient One</td><td>Test Bank</td><td class="mono">****1001</td><td class="n">Sep 12</td></tr>
+          <tr><td>Test Recipient Two</td><td>Test Bank</td><td class="mono">****1002</td><td class="n">Aug 30</td></tr>
+          <tr><td>Test Recipient Three</td><td>Test Bank</td><td class="mono">****1003</td><td class="n">Aug 09</td></tr>
         </tbody>
       </table></div>
     </div>
     <div class="card pad" style="margin-top:16px">
       <h3 style="font-size:1.05rem;margin-bottom:10px">Add a recipient</h3>
-      <div class="field"><label>Full name</label><input placeholder="e.g., Adaeze Okafor"></div>
-      <div class="field"><label>Bank</label><select><option>GTBank</option><option>Access Bank</option><option>Zenith Bank</option><option>First Bank</option><option>UBA</option><option>Opay / Moniepoint (wallet)</option></select></div>
-      <div class="field"><label>Account number (NUBAN)</label><input class="mono" inputmode="numeric" placeholder="10-digit account number"></div>
+      <div class="field"><label>Full name</label><input placeholder="e.g., Test Recipient"></div>
+      <div class="field"><label>Destination country</label><select id="recCountry"></select></div>
+      <div class="field"><label>Bank / wallet</label><input placeholder="Recipient bank or mobile wallet"></div>
+      <div class="field"><label>Account / IBAN / wallet number</label><input class="mono" placeholder="Account, IBAN, or wallet number"></div>
       <button class="btn btn-primary" style="margin-top:14px" onclick="toast('Recipient saved (demo)')">Save recipient</button>
     </div>
   </section>
@@ -494,7 +499,7 @@ tbody tr:last-child td{border-bottom:0}
 &nbsp;&nbsp;<span class="k">"usd_amount"</span>: <span class="s">500.00</span>,<br>
 &nbsp;&nbsp;<span class="k">"amount_ngn"</span>: <span class="s">792500</span>,<br>
 &nbsp;&nbsp;<span class="k">"method"</span>: <span class="s">"bank_account"</span>,<br>
-&nbsp;&nbsp;<span class="k">"recipient"</span>: { <span class="k">"name"</span>: <span class="s">"Adaeze Okafor"</span>, <span class="k">"bank_code"</span>: <span class="s">"058"</span>, <span class="k">"nuban"</span>: <span class="s">"0123454471"</span> }<br>
+&nbsp;&nbsp;<span class="k">"recipient"</span>: { <span class="k">"name"</span>: <span class="s">"Test Recipient One"</span>, <span class="k">"bank_code"</span>: <span class="s">"058"</span>, <span class="k">"nuban"</span>: <span class="s">"0123454471"</span> }<br>
 }<br>
 <span class="c">// You credit the beneficiary, then acknowledge:</span><br>
 <span class="c">// POST https://api.payexpress.com/v1/payouts/PX-8842013/ack  { "status": "paid" }</span></div>
@@ -509,7 +514,61 @@ tbody tr:last-child td{border-bottom:0}
     <div class="callout" style="margin-top:18px">Already running an IMTO or switching platform? PayExpress drops in alongside your existing rails - start with a single corridor and scale.</div>
   </section>
 
-  <div class="foot">PayExpress is a product prototype for demonstration. No real accounts, cards, or funds are processed.</div>
+  <!-- ADMIN -->
+  <section class="view" id="view-admin">
+    <!-- gate -->
+    <div id="adminGate" class="card pad" style="max-width:420px;margin:0 auto">
+      <div class="eyebrow">Admin portal</div>
+      <h1 style="font-size:1.4rem;margin:3px 0 10px">Staff sign in</h1>
+      <p class="hint" style="color:var(--muted);font-size:.88rem;margin-bottom:12px">Enter the admin passcode to view transactions, run reports and manage exchange rates.</p>
+      <div class="field" style="margin-top:0"><label>Passcode</label><input id="adminPass" type="password" placeholder="Passcode" onkeydown="if(event.key==='Enter')adminLogin()"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="adminLogin()">Sign in</button>
+    </div>
+
+    <!-- dashboard -->
+    <div id="adminPanel" class="hidden">
+      <div class="section-h"><div><div class="eyebrow">Admin portal</div><h1 style="font-size:1.5rem;margin-top:3px">Dashboard</h1></div>
+        <button class="btn btn-ghost" onclick="adminLogout()">Sign out</button>
+      </div>
+
+      <!-- report period + stats -->
+      <div class="card pad">
+        <div class="section-h" style="margin-bottom:10px"><h3 style="font-size:1.05rem">Report</h3>
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="periodBtns">
+            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('day',this)">Daily</button>
+            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('week',this)">Weekly</button>
+            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('month',this)">Monthly</button>
+            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('year',this)">Yearly</button>
+            <button class="btn btn-ghost" style="padding:8px 12px" onclick="setPeriod('all',this)">All time</button>
+          </div>
+        </div>
+        <div class="mini" id="adminStats" style="grid-template-columns:repeat(4,1fr)"></div>
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn btn-ghost" style="padding:9px 14px" onclick="exportTxnsCSV()">Export transactions (CSV)</button>
+          <button class="btn btn-ghost" style="padding:9px 14px" onclick="seedDemoTxns()">Add demo transactions</button>
+        </div>
+      </div>
+
+      <!-- transactions -->
+      <div class="section-h" style="margin-top:24px"><div><div class="eyebrow">Ledger</div><h2 style="font-size:1.3rem;margin-top:3px">Transactions</h2></div></div>
+      <div class="card pad"><div style="overflow-x:auto"><table>
+        <thead><tr><th>Date</th><th>Reference</th><th>Recipient</th><th>Country</th><th class="n">Sent (USD)</th><th class="n">Payout</th><th style="text-align:right">Status</th></tr></thead>
+        <tbody id="adminTxnBody"></tbody>
+      </table></div></div>
+
+      <!-- exchange rates -->
+      <div class="section-h" style="margin-top:24px"><div><div class="eyebrow">FX control</div><h2 style="font-size:1.3rem;margin-top:3px">Exchange rates</h2></div>
+        <button class="btn btn-primary" style="padding:9px 14px" onclick="saveRatesForm()">Save rates</button>
+      </div>
+      <p class="hint" style="color:var(--muted);font-size:.86rem;margin:-6px 0 12px">Rate = units of the local currency per 1 USD. Changes apply immediately to the send calculator for every customer on this device.</p>
+      <div class="card pad"><div style="overflow-x:auto"><table>
+        <thead><tr><th>Country</th><th>Currency</th><th class="n">Rate (per 1 USD)</th></tr></thead>
+        <tbody id="adminRateBody"></tbody>
+      </table></div></div>
+    </div>
+  </section>
+
+  <div class="foot">PayExpress is a product prototype for demonstration. No real accounts, cards, or funds are processed. · <a href="#" onclick="go('admin');return false">Admin</a></div>
 </main>
 <nav class="botnav" role="tablist" aria-label="Sections">
   <button aria-selected="true" onclick="go('send')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg><span>Send</span></button>
@@ -523,7 +582,39 @@ tbody tr:last-child td{border-bottom:0}
 <div class="toast" id="toast"></div>
 
 <script>
-var RATE=1585, FEEPCT=0.015, FEEMIN=1.99;
+var FEEPCT=0.015, FEEMIN=1.99;
+/* Destination corridors — susucore.com corridors (NGN, GBP, EUR) plus a global set.
+   Rates are demo defaults (USD base) and are admin-editable (stored in px_rates). */
+var COUNTRIES=[
+ {c:"NG",n:"Nigeria",f:"🇳🇬",ccy:"NGN",rate:1585},
+ {c:"GB",n:"United Kingdom",f:"🇬🇧",ccy:"GBP",rate:0.79},
+ {c:"EU",n:"Eurozone",f:"🇪🇺",ccy:"EUR",rate:0.92},
+ {c:"GH",n:"Ghana",f:"🇬🇭",ccy:"GHS",rate:15.2},
+ {c:"KE",n:"Kenya",f:"🇰🇪",ccy:"KES",rate:129},
+ {c:"IN",n:"India",f:"🇮🇳",ccy:"INR",rate:88},
+ {c:"PH",n:"Philippines",f:"🇵🇭",ccy:"PHP",rate:58},
+ {c:"MX",n:"Mexico",f:"🇲🇽",ccy:"MXN",rate:18.3},
+ {c:"CA",n:"Canada",f:"🇨🇦",ccy:"CAD",rate:1.37},
+ {c:"BR",n:"Brazil",f:"🇧🇷",ccy:"BRL",rate:5.4},
+ {c:"ZA",n:"South Africa",f:"🇿🇦",ccy:"ZAR",rate:18.2},
+ {c:"PK",n:"Pakistan",f:"🇵🇰",ccy:"PKR",rate:278},
+ {c:"BD",n:"Bangladesh",f:"🇧🇩",ccy:"BDT",rate:119},
+ {c:"EG",n:"Egypt",f:"🇪🇬",ccy:"EGP",rate:48},
+ {c:"CN",n:"China",f:"🇨🇳",ccy:"CNY",rate:7.1},
+ {c:"JP",n:"Japan",f:"🇯🇵",ccy:"JPY",rate:150},
+ {c:"CO",n:"Colombia",f:"🇨🇴",ccy:"COP",rate:4100},
+ {c:"PE",n:"Peru",f:"🇵🇪",ccy:"PEN",rate:3.75},
+ {c:"UG",n:"Uganda",f:"🇺🇬",ccy:"UGX",rate:3800},
+ {c:"TZ",n:"Tanzania",f:"🇹🇿",ccy:"TZS",rate:2600},
+ {c:"SN",n:"Senegal / WAEMU",f:"🇸🇳",ccy:"XOF",rate:600},
+ {c:"AE",n:"United Arab Emirates",f:"🇦🇪",ccy:"AED",rate:3.67},
+ {c:"AU",n:"Australia",f:"🇦🇺",ccy:"AUD",rate:1.52}
+];
+function loadRates(){try{var o=JSON.parse(localStorage.getItem("px_rates")||"null");if(o){for(var i=0;i<COUNTRIES.length;i++){if(o[COUNTRIES[i].ccy]!=null)COUNTRIES[i].rate=Number(o[COUNTRIES[i].ccy]);}}}catch(e){}}
+function saveRates(){var o={};for(var i=0;i<COUNTRIES.length;i++)o[COUNTRIES[i].ccy]=COUNTRIES[i].rate;try{localStorage.setItem("px_rates",JSON.stringify(o));}catch(e){}}
+function destByCcy(ccy){for(var i=0;i<COUNTRIES.length;i++)if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i];return COUNTRIES[0];}
+var dest=COUNTRIES[0];
+function fmtRate(x){return x>=100?Math.round(x).toLocaleString("en-US"):Number(x).toLocaleString("en-US",{maximumFractionDigits:4});}
 function toggleTheme(){var r=document.documentElement;var cur=r.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");var nx=cur==="dark"?"light":"dark";r.setAttribute("data-theme",nx);try{localStorage.setItem("px-theme",nx)}catch(e){}}
 try{var _t=localStorage.getItem("px-theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}
 
@@ -531,6 +622,7 @@ function go(v){
   var el=document.getElementById("view-"+v); if(!el) return;
   var views=document.querySelectorAll(".view"); for(var i=0;i<views.length;i++)views[i].classList.remove("active");
   el.classList.add("active");
+  if(v==="admin"&&typeof renderAdmin==="function")renderAdmin();
   var tabs=document.querySelectorAll(".tabs button, .botnav button");
   for(var j=0;j<tabs.length;j++){var oc=tabs[j].getAttribute("onclick")||"";tabs[j].setAttribute("aria-selected", oc.indexOf("go('"+v+"'")===0?"true":"false");}
   var t=document.querySelector('.tabs button[aria-selected="true"]'); if(t&&t.scrollIntoView)t.scrollIntoView({inline:"center",block:"nearest"});
@@ -547,12 +639,23 @@ function calc(){
   var usd=num(document.getElementById("sendAmt").value);
   var fee=Math.max(FEEMIN, usd*FEEPCT);
   var total=usd+fee;
-  var ngn=usd*RATE;
-  document.getElementById("recvAmt").textContent=fmtN(ngn);
+  var rcv=usd*dest.rate;
+  document.getElementById("recvAmt").textContent=fmtN(rcv);
+  var rc=document.getElementById("recvCur"); if(rc)rc.textContent=dest.ccy;
+  var rf=document.getElementById("recvFlag"); if(rf)rf.textContent=dest.f;
   document.getElementById("feeLine").textContent=fmt(fee);
   document.getElementById("mFee").textContent=fmt(fee);
   document.getElementById("totalLine").textContent=fmt(total);
   document.getElementById("btnAmt").textContent=fmt(total);
+  var r=fmtRate(dest.rate);
+  var rl=document.getElementById("rateLine"); if(rl)rl.textContent="1 USD = "+r+" "+dest.ccy;
+  var mr=document.getElementById("mRate"); if(mr)mr.textContent=r;
+}
+function onDest(){var sel=document.getElementById("destCountry"); if(sel){dest=destByCcy(sel.value);} calc();}
+function fillCountrySelects(){
+  var opts="";for(var i=0;i<COUNTRIES.length;i++){var k=COUNTRIES[i];opts+='<option value="'+k.ccy+'">'+k.f+'  '+k.n+' ('+k.ccy+')</option>';}
+  var d=document.getElementById("destCountry"); if(d){d.innerHTML=opts; d.value=dest.ccy;}
+  var rc=document.getElementById("recCountry"); if(rc){rc.innerHTML=opts;}
 }
 function pickMethod(el,name){
   var ms=document.querySelectorAll(".method"); for(var i=0;i<ms.length;i++)ms[i].setAttribute("aria-pressed","false");
@@ -561,39 +664,40 @@ function pickMethod(el,name){
 
 /* activity */
 var transfers=[
-  {name:"Adaeze Okafor", method:"Bank account", usd:500, status:"paid", date:"Sep 12"},
-  {name:"Emeka Nwosu", method:"Mobile wallet", usd:250, status:"paid", date:"Aug 30"},
-  {name:"Chidi Balogun", method:"Cash pickup", usd:120, status:"paid", date:"Aug 09"}
+  {name:"Test Recipient One", method:"Bank account", usd:500, ccy:"NGN", rate:1585, status:"paid", date:"Sep 12"},
+  {name:"Test Recipient Two", method:"Mobile wallet", usd:250, ccy:"GHS", rate:15.2, status:"paid", date:"Aug 30"},
+  {name:"Test Recipient Three", method:"Cash pickup", usd:120, ccy:"GBP", rate:0.79, status:"paid", date:"Aug 09"}
 ];
 function renderActivity(){
   var b=document.getElementById("actBody"); var h="";
   for(var i=0;i<transfers.length;i++){var t=transfers[i];
     var tag=t.status==="paid"?'<span class="tag paid">Paid out</span>':'<span class="tag proc">Processing</span>';
-    h+='<tr><td>'+t.name+'</td><td>'+t.method+'</td><td class="n mono">'+fmt(t.usd)+'</td><td class="n mono">'+fmtN(t.usd*RATE)+' NGN</td><td style="text-align:right">'+tag+'</td></tr>';
+    var payout=fmtN(t.usd*(t.rate||1))+" "+(t.ccy||"");
+    h+='<tr><td>'+t.name+'</td><td>'+t.method+'</td><td class="n mono">'+fmt(t.usd)+'</td><td class="n mono">'+payout+'</td><td style="text-align:right">'+tag+'</td></tr>';
   }
   b.innerHTML=h;
 }
-function persistTxn(t){try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");a.unshift(t);localStorage.setItem("px_txns",JSON.stringify(a.slice(0,200)));}catch(e){}}
+function persistTxn(t){try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");a.unshift(t);localStorage.setItem("px_txns",JSON.stringify(a.slice(0,500)));}catch(e){}}
+function markPaid(ref){try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");for(var i=0;i<a.length;i++)if(a[i].ref===ref)a[i].status="Paid out";localStorage.setItem("px_txns",JSON.stringify(a));}catch(e){}}
 function sendMoney(){
   var usd=num(document.getElementById("sendAmt").value);
   if(usd<=0){toast("Enter an amount to send");return;}
   var recip=document.getElementById("recip").value.split(" - ")[0];
+  var fee=Math.round(Math.max(FEEMIN, usd*FEEPCT)*100)/100;
   var ref="PX-"+Math.floor(1000000+Math.random()*9000000);
-  transfers.unshift({name:recip, method:method, usd:usd, status:"proc", date:"Now"});
-  persistTxn({ref:ref, date:new Date().toISOString(), sender:"App user", recipient:recip, method:method, usd:usd, ngn:Math.round(usd*RATE), status:"Processing"});
+  var payout=Math.round(usd*dest.rate);
+  transfers.unshift({name:recip, method:method, usd:usd, ccy:dest.ccy, rate:dest.rate, status:"proc", date:"Now"});
+  persistTxn({ref:ref, date:new Date().toISOString(), sender:"App user", recipient:recip, country:dest.n, method:method, usd:usd, fee:fee, ccy:dest.ccy, rate:dest.rate, payout:payout, status:"Processing"});
   renderActivity();
   toast("Transfer of "+fmt(usd)+" started to "+recip);
   go("activity");
-  setTimeout(function(){ if(transfers[0]){transfers[0].status="paid";renderActivity();} },2600);
+  setTimeout(function(){ if(transfers[0]){transfers[0].status="paid";renderActivity();} markPaid(ref); },2600);
 }
 
 function loadCfg(){
   try{var c=JSON.parse(localStorage.getItem("px_cfg")||"null");
-    if(c){ if(c.rate)RATE=c.rate; if(c.feePct!=null)FEEPCT=c.feePct/100; if(c.feeMin!=null)FEEMIN=c.feeMin; }
+    if(c){ if(c.feePct!=null)FEEPCT=c.feePct/100; if(c.feeMin!=null)FEEMIN=c.feeMin; }
   }catch(e){}
-  var r=Math.round(RATE).toLocaleString("en-US");
-  var mr=document.getElementById("mRate"); if(mr)mr.textContent=r;
-  var rl=document.getElementById("rateLine"); if(rl)rl.textContent="1 USD = "+r+" NGN";
 }
 
 /* ---- KYC / HHFCU card ---- */
@@ -625,7 +729,64 @@ function submitKyc(){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-loadCfg(); calc(); renderActivity(); renderHhfcuCard();
+/* ---- Admin portal ---- */
+var ADMIN_PASS="payexpress2026";
+var adminPeriod="month";
+function adminIsUnlocked(){try{return sessionStorage.getItem("px_admin")==="1";}catch(e){return false;}}
+function adminLogin(){var el=document.getElementById("adminPass");var p=el?el.value:"";if(p===ADMIN_PASS){try{sessionStorage.setItem("px_admin","1");}catch(e){}renderAdmin();toast("Signed in to admin");}else{toast("Incorrect passcode");}}
+function adminLogout(){try{sessionStorage.removeItem("px_admin");}catch(e){}renderAdmin();}
+function getTxns(){try{return JSON.parse(localStorage.getItem("px_txns")||"[]");}catch(e){return [];}}
+function periodStart(p){var n=new Date();if(p==="day"){return new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime();}if(p==="week"){var d=new Date(n.getFullYear(),n.getMonth(),n.getDate());var day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return d.getTime();}if(p==="month"){return new Date(n.getFullYear(),n.getMonth(),1).getTime();}if(p==="year"){return new Date(n.getFullYear(),0,1).getTime();}return 0;}
+function setPeriod(p,btn){adminPeriod=p;var bs=document.querySelectorAll("#periodBtns .btn");for(var i=0;i<bs.length;i++){bs[i].className="btn btn-ghost";bs[i].style.padding="8px 12px";}if(btn){btn.className="btn btn-primary";btn.style.padding="8px 12px";}renderAdminStats();}
+function renderAdminStats(){
+  var start=periodStart(adminPeriod);var tx=getTxns();var cnt=0,usd=0,fee=0,byc={};
+  for(var i=0;i<tx.length;i++){var t=tx[i];var ts=Date.parse(t.date||"")||0;if(ts<start)continue;cnt++;usd+=Number(t.usd)||0;fee+=Number(t.fee)||0;var c=t.ccy||"?";byc[c]=(byc[c]||0)+1;}
+  var top="-",mx=-1;for(var k in byc){if(byc[k]>mx){mx=byc[k];top=k+" ("+byc[k]+")";}}
+  var el=document.getElementById("adminStats");if(!el)return;
+  el.innerHTML='<div class="b"><div class="k">Transactions</div><div class="v mono">'+cnt+'</div></div>'+
+   '<div class="b"><div class="k">Volume (USD)</div><div class="v mono">'+fmt(usd)+'</div></div>'+
+   '<div class="b"><div class="k">Fees (USD)</div><div class="v mono">'+fmt(fee)+'</div></div>'+
+   '<div class="b"><div class="k">Top corridor</div><div class="v">'+top+'</div></div>';
+}
+function renderAdminTxns(){
+  var tx=getTxns();var b=document.getElementById("adminTxnBody");if(!b)return;
+  if(!tx.length){b.innerHTML='<tr><td colspan="7" style="color:var(--muted)">No transactions yet. Send a transfer on the Send tab, or click "Add demo transactions".</td></tr>';return;}
+  var h="";for(var i=0;i<tx.length;i++){var t=tx[i];var d=new Date(t.date);var ds=isNaN(d.getTime())?(t.date||""):d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    var paid=(t.status||"").toLowerCase().indexOf("paid")>=0;var tag=paid?'<span class="tag paid">'+t.status+'</span>':'<span class="tag proc">'+(t.status||"Processing")+'</span>';
+    h+='<tr><td class="mono">'+ds+'</td><td class="mono">'+(t.ref||"")+'</td><td>'+(t.recipient||"")+'</td><td>'+(t.country||"")+'</td><td class="n mono">'+fmt(Number(t.usd)||0)+'</td><td class="n mono">'+fmtN(Number(t.payout)||0)+' '+(t.ccy||"")+'</td><td style="text-align:right">'+tag+'</td></tr>';}
+  b.innerHTML=h;
+}
+function renderRateEditor(){
+  var b=document.getElementById("adminRateBody");if(!b)return;var h="";
+  for(var i=0;i<COUNTRIES.length;i++){var k=COUNTRIES[i];
+    h+='<tr><td>'+k.f+' '+k.n+'</td><td class="mono">'+k.ccy+'</td><td class="n"><input class="mono" data-ccy="'+k.ccy+'" style="width:140px;text-align:right" inputmode="decimal" value="'+k.rate+'"></td></tr>';}
+  b.innerHTML=h;
+}
+function saveRatesForm(){
+  var ins=document.querySelectorAll("#adminRateBody input[data-ccy]");var changed=0;
+  for(var i=0;i<ins.length;i++){var v=parseFloat(ins[i].value);if(!isNaN(v)&&v>0){var d=destByCcy(ins[i].getAttribute("data-ccy"));if(d.rate!==v){d.rate=v;changed++;}}}
+  saveRates();calc();toast(changed?("Saved — "+changed+" rate(s) updated"):"Rates saved");
+}
+function exportTxnsCSV(){
+  var tx=getTxns();var head=["Date","Reference","Sender","Recipient","Country","Method","USD","Fee","Currency","Rate","Payout","Status"];var rows=[head.join(",")];
+  for(var i=0;i<tx.length;i++){var t=tx[i];rows.push([t.date||"",t.ref||"",t.sender||"",t.recipient||"",t.country||"",t.method||"",t.usd||"",t.fee||"",t.ccy||"",t.rate||"",t.payout||"",t.status||""].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(","));}
+  var blob=new Blob([rows.join("\n")],{type:"text/csv"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="payexpress-transactions.csv";document.body.appendChild(a);a.click();a.remove();toast("CSV downloaded");
+}
+function seedDemoTxns(){
+  var names=["Test Recipient One","Test Recipient Two","Test Recipient Three","Test Recipient Four"];var methods=["Bank account","Mobile wallet","Cash pickup","Debit card"];var now=Date.now();
+  for(var i=0;i<12;i++){var k=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)];var usd=Math.round(50+Math.random()*950);var fee=Math.round(Math.max(FEEMIN,usd*FEEPCT)*100)/100;var dt=new Date(now-Math.floor(Math.random()*400)*86400000);
+    persistTxn({ref:"PX-"+Math.floor(1000000+Math.random()*9000000),date:dt.toISOString(),sender:"App user",recipient:names[i%names.length],country:k.n,method:methods[i%methods.length],usd:usd,fee:fee,ccy:k.ccy,rate:k.rate,payout:Math.round(usd*k.rate),status:"Paid out"});}
+  renderAdmin();toast("Added 12 demo transactions");
+}
+function renderAdmin(){
+  var unlocked=adminIsUnlocked();var gate=document.getElementById("adminGate"),panel=document.getElementById("adminPanel");
+  if(gate)gate.classList.toggle("hidden",unlocked);
+  if(panel)panel.classList.toggle("hidden",!unlocked);
+  if(unlocked){renderAdminStats();renderAdminTxns();renderRateEditor();var pb=document.querySelectorAll("#periodBtns .btn");for(var i=0;i<pb.length;i++){if((pb[i].getAttribute("onclick")||"").indexOf("'"+adminPeriod+"'")>=0){pb[i].className="btn btn-primary";pb[i].style.padding="8px 12px";}}}
+}
+function initAdmin(){renderAdmin();}
+
+loadRates(); loadCfg(); fillCountrySelects(); calc(); renderActivity(); renderHhfcuCard(); initAdmin();
 </script>
 </body>
 </html>
