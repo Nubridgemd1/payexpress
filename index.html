@@ -385,8 +385,8 @@ tbody tr:last-child td{border-bottom:0}
       <h3 style="font-size:1.05rem;margin-bottom:10px">Add a recipient</h3>
       <div class="field"><label>Full name</label><input id="rcpName" placeholder="Recipient's full name"></div>
       <div class="field"><label>Destination country</label><select id="recCountry" onchange="populateBanks()"></select></div>
-      <div class="field"><label>Bank / wallet / institution</label><select id="rcpBank"></select></div>
-      <div class="field"><label>Account / IBAN / wallet number</label><input id="rcpAcct" class="mono" placeholder="Account, IBAN, or wallet number"></div>
+      <div class="field"><label>Bank / wallet / institution</label><input id="rcpBank" list="bankList" autocomplete="off" placeholder="Type to search banks &amp; wallets…" onchange="if(((document.getElementById('rcpAcct')||{}).value||'').replace(/\s/g,'').length>=6)resolveAccount()"><datalist id="bankList"></datalist></div>
+      <div class="field"><label>Account / IBAN / wallet number</label><input id="rcpAcct" class="mono" placeholder="Account, IBAN, or wallet number" onblur="resolveAccount()"><div id="rcpResolve" style="font-size:.8rem;color:var(--muted);margin-top:4px"></div></div>
       <button class="btn btn-primary" style="margin-top:14px" onclick="saveRecipientForm()">Save recipient</button>
     </div>
   </section>
@@ -585,7 +585,9 @@ tbody tr:last-child td{border-bottom:0}
         <div class="card pad" style="margin-top:14px">
           <h3 style="font-size:1.05rem;margin-bottom:4px">Go-live — live payment &amp; payout backend</h3>
           <p class="hint" style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Connect the licensed processing endpoint (HHFCU / IMTO settlement API). Until it's set, the app disables transfers and never simulates a send. Full go-live also needs the card processor, the IMTO payout integration, KYC/AML &amp; OFAC screening, and HHFCU (Transmitter of Record) sign-off.</p>
-          <div class="field"><label>Transfer API endpoint (POST)</label><input id="fApi" type="text" placeholder="https://api.yourbackend.com/payexpress/transfer"></div>
+          <div class="field"><label>Transfer API endpoint (POST — create transfer)</label><input id="fApi" type="text" placeholder="https://api.yourbackend.com/payexpress/transfer"></div>
+          <div class="field"><label>Status endpoint (GET ?ref= — optional)</label><input id="fStatus" type="text" placeholder="https://api.yourbackend.com/payexpress/transfer/status"><span class="hint">The app polls this for pending transfers and updates them to Paid out / Failed when your backend reports it.</span></div>
+          <div class="field"><label>Account-resolution endpoint (POST — optional)</label><input id="fResolve" type="text" placeholder="https://api.yourbackend.com/payexpress/resolve-account"><span class="hint">Name enquiry: given {currency, institution, account} it returns the account holder name, which auto-fills on the recipient form.</span></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn btn-primary" style="padding:9px 14px" onclick="saveBackend()">Save backend</button>
             <button class="btn btn-ghost" style="padding:9px 14px" onclick="clearAppData()">Clear all app data</button>
@@ -778,13 +780,32 @@ var BANKS_BY_CCY={
   ["Digital Banks & Wallets",["Revolut","Wise","N26","bunq","PayPal"]]]
 };
 function populateBanks(){
-  var sel=document.getElementById("rcpBank"); if(!sel)return;
+  var dl=document.getElementById("bankList"); if(!dl)return;
   var cc=document.getElementById("recCountry"); var ccy=cc&&cc.value?cc.value:"NGN";
   var groups=BANKS_BY_CCY[ccy]||[["Banks",["Bank transfer"]],["Wallets",["Mobile wallet"]]];
-  var h="";
-  for(var g=0;g<groups.length;g++){ h+='<optgroup label="'+esc(groups[g][0])+'">'; var its=groups[g][1]; for(var i=0;i<its.length;i++){ h+='<option>'+esc(its[i])+'</option>'; } h+='</optgroup>'; }
-  h+='<optgroup label="Other"><option>Other / not listed</option></optgroup>';
-  sel.innerHTML=h;
+  var h="",seen={};
+  for(var g=0;g<groups.length;g++){ var its=groups[g][1]; for(var i=0;i<its.length;i++){ var v=its[i]; if(seen[v])continue; seen[v]=1; h+='<option value="'+esc(v)+'">'+esc(groups[g][0])+'</option>'; } }
+  seen["Other / not listed"]=1; h+='<option value="Other / not listed"></option>';
+  dl.innerHTML=h;
+  var inp=document.getElementById("rcpBank"); if(inp && inp.value && !seen[inp.value]) inp.value=""; // clear stale bank when country changes
+}
+/* account-name verification (name enquiry) — resolves holder name from account + bank */
+function getResolveUrl(){try{return (localStorage.getItem("px_resolve")||"").trim();}catch(e){return"";}}
+function resolveAccount(){
+  var acctEl=document.getElementById("rcpAcct"),bankEl=document.getElementById("rcpBank"),nameEl=document.getElementById("rcpName"),st=document.getElementById("rcpResolve");
+  if(!acctEl)return;
+  var acct=(acctEl.value||"").replace(/\s/g,""),bank=(bankEl&&bankEl.value||"").trim(),ccy=(document.getElementById("recCountry")||{}).value||"NGN";
+  if(acct.length<6){ if(st)st.textContent=""; return; }
+  var ru=getResolveUrl();
+  if(!ru){ if(st){st.style.color="#8a6d1f";st.textContent="Account-name verification activates once the backend is connected.";} return; }
+  if(st){st.style.color="var(--muted)";st.textContent="Checking account name…";}
+  try{ fetch(ru,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({currency:ccy,institution:bank,account:acct})})
+    .then(function(r){return r.json().catch(function(){return{};});})
+    .then(function(j){
+      if(j&&j.accountName){ if(nameEl)nameEl.value=j.accountName; if(j.institution&&bankEl)bankEl.value=j.institution; if(st){st.style.color="#12915a";st.textContent="✓ "+j.accountName+(j.institution?(" · "+j.institution):"");} }
+      else { if(st){st.style.color="#b5730c";st.textContent=(j&&j.message)||"Couldn't verify this account — check the number and bank.";} }
+    }).catch(function(){ if(st){st.style.color="#b5730c";st.textContent="Name check unavailable right now.";} });
+  }catch(e){}
 }
 function saveRecipientForm(){
   var name=(document.getElementById("rcpName").value||"").trim();
@@ -797,7 +818,7 @@ function saveRecipientForm(){
   var a=getRecipients();var newId="R"+Date.now();
   a.unshift({id:newId,name:name,ccy:ccy,bank:bank,acct:acct,created:new Date().toISOString()});
   setRecipients(a);
-  document.getElementById("rcpName").value="";document.getElementById("rcpBank").selectedIndex=0;document.getElementById("rcpAcct").value="";
+  document.getElementById("rcpName").value="";document.getElementById("rcpBank").value="";document.getElementById("rcpAcct").value="";
   renderRecipients();populateRecipSelect();
   var rs=document.getElementById("recip"); if(rs)rs.value=newId;                 // pre-select for the send flow
   var ds=document.getElementById("destCountry"); if(ds){ds.value=ccy; onDest();} // sync the quote to their country
@@ -818,13 +839,24 @@ function populateRecipSelect(){
   sel.innerHTML=h;
 }
 function applyLiveState(){var el=document.getElementById("pxLive");if(el){el.textContent=getApiEndpoint()?"":"Not yet connected to the live payment & payout backend — transfers are disabled until an administrator connects the processor / IMTO endpoint.";}}
-function saveBackend(){var v=(document.getElementById("fApi").value||"").trim();try{localStorage.setItem("px_backend",v)}catch(e){}applyLiveState();renderLiveState();toast(v?"Live backend connected — transfers enabled":"Backend cleared — not-live mode");}
+function saveBackend(){var v=(document.getElementById("fApi").value||"").trim();var s=(document.getElementById("fStatus")?document.getElementById("fStatus").value:"").trim();var rv=(document.getElementById("fResolve")?document.getElementById("fResolve").value:"").trim();try{localStorage.setItem("px_backend",v);localStorage.setItem("px_status",s);localStorage.setItem("px_resolve",rv);}catch(e){}applyLiveState();renderLiveState();if(v)pollStatuses();toast(v?"Live backend connected — transfers enabled":"Backend cleared — not-live mode");}
 function renderLiveState(){var el=document.getElementById("liveState");if(!el)return;el.innerHTML=getApiEndpoint()?'<b style="color:var(--good)">● Live backend connected</b> — transfers enabled.':'<b style="color:var(--warn)">● Not live</b> — transfers disabled until a backend is connected.';}
 function clearAppData(){if(!confirm("Clear all recipients, transfers, KYC and card data on this device? This cannot be undone."))return;["px_txns","px_recipients","px_kyc","px_hhfcu_card"].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});transfers=[];renderActivity();renderRecipients();populateRecipSelect();try{renderAdmin();}catch(e){}toast("All app data cleared");}
 
 /* activity — from stored transactions */
 function getTxns(){try{return JSON.parse(localStorage.getItem("px_txns")||"[]")}catch(e){return[];}}
-var transfers=getTxns().map(function(t){return {name:t.recipient||t.name||"",method:t.method,usd:t.usd,ccy:t.ccy,rate:t.rate,status:(/paid|complete|success|delivered/i.test(t.status||"")?"paid":"proc"),date:(t.date&&String(t.date).length>12)?new Date(t.date).toLocaleDateString("en-US",{month:"short",day:"2-digit"}):(t.date||"")};});
+function mapTxn(t){return {name:t.recipient||t.name||"",method:t.method,usd:t.usd,ccy:t.ccy,rate:t.rate,status:(/paid|complete|success|delivered/i.test(t.status||"")?"paid":"proc"),date:(t.date&&String(t.date).length>12)?new Date(t.date).toLocaleDateString("en-US",{month:"short",day:"2-digit"}):(t.date||"")};}
+var transfers=getTxns().map(mapTxn);
+/* status callback — backend reports a transfer's state; the app reflects it */
+function getStatusUrl(){try{return (localStorage.getItem("px_status")||"").trim();}catch(e){return"";}}
+function displayStatus(s){s=String(s||"").toLowerCase();if(/paid|deliver|complete|success|settled/.test(s))return"Paid out";if(/fail|reject|cancel|declin/.test(s))return"Failed";if(/refund/.test(s))return"Refunded";return"Processing";}
+function setTxnStatus(ref,backendStatus){var disp=displayStatus(backendStatus);
+  try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");var ch=false;for(var i=0;i<a.length;i++){if(a[i].ref===ref&&a[i].status!==disp){a[i].status=disp;ch=true;}}if(ch)localStorage.setItem("px_txns",JSON.stringify(a));}catch(e){}
+  transfers=getTxns().map(mapTxn);if(document.getElementById("actBody"))renderActivity();try{if(typeof renderAdmin==="function")renderAdmin();}catch(e){}}
+function pollStatuses(){var su=getStatusUrl();if(!su)return;
+  var a=getTxns().filter(function(t){return /process/i.test(t.status||"");}).slice(0,25);
+  a.forEach(function(t){try{fetch(su+(su.indexOf("?")>=0?"&":"?")+"ref="+encodeURIComponent(t.ref)).then(function(r){return r.json().catch(function(){return{};});}).then(function(j){if(j&&j.status)setTxnStatus(t.ref,j.status);}).catch(function(){});}catch(e){}});}
+function cleanCountry(ccy){return (ccyName(ccy)||"").replace(/[\uD800-\uDFFF]/g,"").trim();}
 function renderActivity(){
   var b=document.getElementById("actBody"); if(!b)return;
   if(!transfers.length){b.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:22px">No transfers yet.</td></tr>';return;}
@@ -854,7 +886,16 @@ function sendMoney(){
   persistTxn(rec);
   transfers.unshift({name:r.name,method:method,usd:usd,ccy:rcur,rate:rrate,status:"proc",date:"Now"});
   renderActivity();
-  if(ep){try{fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}).catch(function(){});}catch(e){}}
+  if(ep){
+    var payload={ ref:ref, createdAt:rec.date, status:"processing",
+      sender:{ name:rec.sender||null },
+      recipient:{ name:r.name, country:cleanCountry(rcur), countryCode:(destByCcy(rcur)||{}).c||null, currency:rcur, method:method, institution:r.bank, account:r.acct },
+      amount:{ sendUsd:usd, feeUsd:0, fxRate:rrate, payout:payout, payoutCurrency:rcur } };
+    try{ fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+      .then(function(res){return res.json().catch(function(){return{};});})
+      .then(function(j){ if(j&&j.status) setTxnStatus(ref, j.status); })
+      .catch(function(){}); }catch(e){}
+  }
   toast("Transfer of "+fmt(usd)+" submitted to "+r.name+" · Ref "+ref+(ep?"":" — pending live processing"));
   go("activity");
 }
@@ -963,7 +1004,8 @@ function initAdmin(){renderAdmin();}
 
 loadRates(); loadCfg(); fillCountrySelects(); calc(); renderActivity(); renderHhfcuCard(); initAdmin();
 renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState();
-(function(){var fa=document.getElementById("fApi");if(fa)fa.value=getApiEndpoint();renderLiveState();})();
+(function(){var fa=document.getElementById("fApi");if(fa)fa.value=getApiEndpoint();var fs=document.getElementById("fStatus");if(fs)fs.value=getStatusUrl();var fr=document.getElementById("fResolve");if(fr)fr.value=getResolveUrl();renderLiveState();})();
+pollStatuses(); setInterval(pollStatuses, 60000);
 </script>
 </body>
 </html>
