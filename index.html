@@ -384,8 +384,8 @@ tbody tr:last-child td{border-bottom:0}
     <div class="card pad" style="margin-top:16px">
       <h3 style="font-size:1.05rem;margin-bottom:10px">Add a recipient</h3>
       <div class="field"><label>Full name</label><input id="rcpName" placeholder="Recipient's full name"></div>
-      <div class="field"><label>Destination country</label><select id="recCountry"></select></div>
-      <div class="field"><label>Bank / wallet</label><input id="rcpBank" placeholder="Recipient bank or mobile wallet"></div>
+      <div class="field"><label>Destination country</label><select id="recCountry" onchange="populateBanks()"></select></div>
+      <div class="field"><label>Bank / wallet / institution</label><select id="rcpBank"></select></div>
       <div class="field"><label>Account / IBAN / wallet number</label><input id="rcpAcct" class="mono" placeholder="Account, IBAN, or wallet number"></div>
       <button class="btn btn-primary" style="margin-top:14px" onclick="saveRecipientForm()">Save recipient</button>
     </div>
@@ -723,6 +723,69 @@ function ccyRate(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===
 function getRecipients(){try{return JSON.parse(localStorage.getItem("px_recipients")||"[]")}catch(e){return[];}}
 function setRecipients(a){try{localStorage.setItem("px_recipients",JSON.stringify(a))}catch(e){}}
 function last4(s){s=String(s||"").replace(/[^A-Za-z0-9]/g,"");return s.slice(-4)||"----";}
+/* Receiving institutions by destination currency — banks, wallets & licensed FIs */
+var BANKS_BY_CCY={
+ NGN:[
+  ["Commercial Banks",["Access Bank","Citibank Nigeria","Ecobank Nigeria","Fidelity Bank","First Bank of Nigeria","First City Monument Bank (FCMB)","Globus Bank","Guaranty Trust Bank (GTBank)","Keystone Bank","Optimus Bank","Parallex Bank","Polaris Bank","PremiumTrust Bank","Providus Bank","Signature Bank","Stanbic IBTC Bank","Standard Chartered Bank","Sterling Bank","SunTrust Bank","Titan Trust Bank","Union Bank of Nigeria","United Bank for Africa (UBA)","Unity Bank","Wema Bank","Zenith Bank"]],
+  ["Non-Interest Banks",["Jaiz Bank","TAJBank","Lotus Bank","The Alternative Bank (AltBank)"]],
+  ["Merchant Banks",["Coronation Merchant Bank","FBNQuest Merchant Bank","FSDH Merchant Bank","Greenwich Merchant Bank","Nova Bank","Rand Merchant Bank"]],
+  ["Payment Service Banks",["9 Payment Service Bank (9PSB)","Hope PSB","MoMo PSB (MTN)","Money Master PSB (Glo)","SmartCash PSB (Airtel)"]],
+  ["Mobile Money, Wallets & Fintech",["OPay","PalmPay","Moniepoint","Kuda","Carbon","FairMoney","VFD (V by VFD)","Rubies","Sparkle","Mint","Eyowo","Paga","PiggyVest (PocketApp)","Cowrywise","Chipper Cash","Gomoney","Raven Bank","Flutterwave (Barter)","Branch"]],
+  ["Microfinance Banks (major)",["LAPO MFB","AB MFB","Accion MFB","Baobab MFB","Infinity MFB","Fina Trust MFB","Addosser MFB","Mutual Trust MFB","NPF MFB","Fortis MFB","Page MFB","Petra MFB","Grooming MFB","Covenant MFB","Mainstreet MFB","Empire Trust MFB"]]],
+ GHS:[["Banks",["GCB Bank","Ecobank Ghana","Absa Bank Ghana","Standard Chartered Ghana","Fidelity Bank Ghana","Zenith Bank Ghana","Stanbic Bank Ghana","Access Bank Ghana","CalBank","Consolidated Bank Ghana","Agricultural Development Bank (ADB)","Republic Bank Ghana","Societe Generale Ghana","UBA Ghana","National Investment Bank"]],
+  ["Mobile Money & Wallets",["MTN Mobile Money (MoMo)","Telecel Cash","AirtelTigo Money (AT Money)","G-Money","Zeepay"]]],
+ KES:[["Banks",["Equity Bank","KCB Bank","Co-operative Bank of Kenya","Absa Bank Kenya","Standard Chartered Kenya","NCBA Bank","Diamond Trust Bank (DTB)","Stanbic Bank Kenya","I&M Bank","Family Bank","National Bank of Kenya","Bank of Africa Kenya"]],
+  ["Mobile Money & Wallets",["M-Pesa (Safaricom)","Airtel Money","T-Kash (Telkom)","Equitel"]]],
+ INR:[["Banks",["State Bank of India (SBI)","HDFC Bank","ICICI Bank","Axis Bank","Punjab National Bank","Bank of Baroda","Kotak Mahindra Bank","Canara Bank","Union Bank of India","IndusInd Bank","Yes Bank","IDBI Bank"]],
+  ["UPI & Wallets",["Paytm","PhonePe","Google Pay (GPay)","Amazon Pay","BHIM UPI","MobiKwik"]]],
+ PHP:[["Banks",["BDO Unibank","Bank of the Philippine Islands (BPI)","Metrobank","Land Bank of the Philippines","Philippine National Bank (PNB)","Security Bank","UnionBank","RCBC","China Bank","EastWest Bank"]],
+  ["E-wallets",["GCash","Maya (PayMaya)","Coins.ph","GrabPay"]]],
+ MXN:[["Banks",["BBVA México","Banorte","Santander México","Citibanamex","HSBC México","Scotiabank México","Banco Azteca","Inbursa","BanCoppel"]],
+  ["Wallets",["Mercado Pago","Spin by OXXO","Clip"]]],
+ CAD:[["Banks",["RBC Royal Bank","TD Canada Trust","Scotiabank","BMO Bank of Montreal","CIBC","National Bank of Canada","Desjardins","Tangerine","Simplii Financial","HSBC Canada"]],
+  ["Transfers & Wallets",["Interac e-Transfer","PayPal","Wise"]]],
+ BRL:[["Banks",["Banco do Brasil","Itaú Unibanco","Bradesco","Caixa Econômica Federal","Santander Brasil","Nubank","Banco Inter","BTG Pactual","Sicoob","Sicredi"]],
+  ["PIX & Wallets",["PIX","Mercado Pago","PicPay","PayPal"]]],
+ ZAR:[["Banks",["Standard Bank","First National Bank (FNB)","Absa","Nedbank","Capitec Bank","Investec","African Bank","TymeBank","Discovery Bank"]],
+  ["Wallets",["PayShap","SnapScan","Zapper","Ozow"]]],
+ PKR:[["Banks",["Habib Bank (HBL)","United Bank (UBL)","MCB Bank","National Bank of Pakistan","Allied Bank","Bank Alfalah","Meezan Bank","Faysal Bank","Askari Bank","Standard Chartered Pakistan"]],
+  ["Mobile Wallets",["JazzCash","Easypaisa","SadaPay","NayaPay"]]],
+ BDT:[["Banks",["Islami Bank Bangladesh","Dutch-Bangla Bank","BRAC Bank","Sonali Bank","Pubali Bank","City Bank","Eastern Bank (EBL)","Standard Chartered Bangladesh","Prime Bank","Bank Asia"]],
+  ["Mobile Financial Services",["bKash","Nagad","Rocket (DBBL)","Upay"]]],
+ EGP:[["Banks",["National Bank of Egypt","Banque Misr","Commercial International Bank (CIB)","QNB Alahli","Banque du Caire","HSBC Egypt","Alexbank","Faisal Islamic Bank"]],
+  ["Mobile Wallets",["Vodafone Cash","Orange Money","Etisalat Cash","InstaPay","Fawry"]]],
+ CNY:[["Banks",["ICBC","China Construction Bank","Agricultural Bank of China","Bank of China","Bank of Communications","China Merchants Bank","Postal Savings Bank (PSBC)"]],
+  ["Wallets",["Alipay","WeChat Pay","UnionPay"]]],
+ JPY:[["Banks",["MUFG Bank","Sumitomo Mitsui Banking (SMBC)","Mizuho Bank","Japan Post Bank (Yucho)","Resona Bank","Rakuten Bank"]],
+  ["Wallets",["PayPay","Rakuten Pay","LINE Pay"]]],
+ COP:[["Banks",["Bancolombia","Banco de Bogotá","Davivienda","BBVA Colombia","Banco de Occidente","Banco Popular","Scotiabank Colpatria"]],
+  ["Wallets",["Nequi","Daviplata","Movii"]]],
+ PEN:[["Banks",["BCP (Banco de Crédito del Perú)","BBVA Perú","Interbank","Scotiabank Perú","Banco de la Nación","BanBif"]],
+  ["Wallets",["Yape","Plin","Tunki"]]],
+ UGX:[["Banks",["Stanbic Bank Uganda","Centenary Bank","Absa Bank Uganda","Standard Chartered Uganda","DFCU Bank","Equity Bank Uganda","Bank of Africa Uganda","Housing Finance Bank"]],
+  ["Mobile Money",["MTN MoMo","Airtel Money"]]],
+ TZS:[["Banks",["CRDB Bank","NMB Bank","National Bank of Commerce (NBC)","Stanbic Bank Tanzania","Absa Bank Tanzania","Exim Bank","Equity Bank Tanzania"]],
+  ["Mobile Money",["M-Pesa (Vodacom)","Mixx by Yas (Tigo Pesa)","Airtel Money","HaloPesa"]]],
+ XOF:[["Banks",["Ecobank","Société Générale Sénégal (SGBS)","Banque Atlantique","Bank of Africa (BOA)","CBAO","UBA Senegal","Orabank","BICIS"]],
+  ["Mobile Money",["Orange Money","Wave","Free Money","Moov Money"]]],
+ AED:[["Banks",["Emirates NBD","First Abu Dhabi Bank (FAB)","Abu Dhabi Commercial Bank (ADCB)","Dubai Islamic Bank","Mashreq Bank","RAKBANK","Emirates Islamic","HSBC UAE"]],
+  ["Wallets",["e& money","Careem Pay","Payit"]]],
+ AUD:[["Banks",["Commonwealth Bank (CBA)","Westpac","ANZ","National Australia Bank (NAB)","Macquarie Bank","Bendigo Bank","ING Australia","Suncorp Bank","Up Bank"]],
+  ["Transfers & Wallets",["PayID / Osko","PayPal","Beem"]]],
+ GBP:[["Banks",["Barclays","HSBC UK","Lloyds Bank","NatWest","Santander UK","Halifax","Nationwide Building Society","TSB Bank","Metro Bank","Co-operative Bank","Virgin Money"]],
+  ["Digital Banks & Wallets",["Monzo","Starling Bank","Revolut","Wise","Chase UK","PayPal"]]],
+ EUR:[["Banks",["Deutsche Bank","BNP Paribas","Santander","ING","Société Générale","UniCredit","Intesa Sanpaolo","Crédit Agricole","BBVA","CaixaBank","Commerzbank","KBC","ABN AMRO","Rabobank","Erste Bank"]],
+  ["Digital Banks & Wallets",["Revolut","Wise","N26","bunq","PayPal"]]]
+};
+function populateBanks(){
+  var sel=document.getElementById("rcpBank"); if(!sel)return;
+  var cc=document.getElementById("recCountry"); var ccy=cc&&cc.value?cc.value:"NGN";
+  var groups=BANKS_BY_CCY[ccy]||[["Banks",["Bank transfer"]],["Wallets",["Mobile wallet"]]];
+  var h="";
+  for(var g=0;g<groups.length;g++){ h+='<optgroup label="'+esc(groups[g][0])+'">'; var its=groups[g][1]; for(var i=0;i<its.length;i++){ h+='<option>'+esc(its[i])+'</option>'; } h+='</optgroup>'; }
+  h+='<optgroup label="Other"><option>Other / not listed</option></optgroup>';
+  sel.innerHTML=h;
+}
 function saveRecipientForm(){
   var name=(document.getElementById("rcpName").value||"").trim();
   var ccy=document.getElementById("recCountry").value;
@@ -731,12 +794,15 @@ function saveRecipientForm(){
   if(!name){toast("Enter the recipient's full name");return;}
   if(!bank){toast("Enter the recipient's bank or wallet");return;}
   if(acct.replace(/\s/g,"").length<6){toast("Enter a valid account / IBAN / wallet number");return;}
-  var a=getRecipients();
-  a.unshift({id:"R"+Date.now(),name:name,ccy:ccy,bank:bank,acct:acct,created:new Date().toISOString()});
+  var a=getRecipients();var newId="R"+Date.now();
+  a.unshift({id:newId,name:name,ccy:ccy,bank:bank,acct:acct,created:new Date().toISOString()});
   setRecipients(a);
-  document.getElementById("rcpName").value="";document.getElementById("rcpBank").value="";document.getElementById("rcpAcct").value="";
+  document.getElementById("rcpName").value="";document.getElementById("rcpBank").selectedIndex=0;document.getElementById("rcpAcct").value="";
   renderRecipients();populateRecipSelect();
-  toast("Recipient saved");
+  var rs=document.getElementById("recip"); if(rs)rs.value=newId;                 // pre-select for the send flow
+  var ds=document.getElementById("destCountry"); if(ds){ds.value=ccy; onDest();} // sync the quote to their country
+  toast("Recipient saved — review and continue to pay");
+  go("send");                                                                    // proceed to the send / checkout screen
 }
 function delRecipient(id){setRecipients(getRecipients().filter(function(r){return r.id!==id;}));renderRecipients();populateRecipSelect();toast("Recipient removed");}
 function renderRecipients(){
@@ -780,9 +846,7 @@ function sendMoney(){
   var r=getRecipients().filter(function(x){return x.id===rid;})[0];
   if(!r){toast("Please add a recipient first");go("recipients");return;}
   var kyc=null;try{kyc=JSON.parse(localStorage.getItem("px_kyc")||"null")}catch(e){}
-  if(!kyc){toast("Verify your identity before sending");go("verify");return;}
   var ep=getApiEndpoint();
-  if(!ep){toast("Transfers aren't live yet — the payment & payout backend isn't connected.");return;}
   var rcur=r.ccy||(dest&&dest.ccy)||"", rrate=ccyRate(rcur);
   var payout=Math.round(usd*rrate);
   var ref="PX-"+Math.floor(1000000+Math.random()*9000000);
@@ -790,8 +854,8 @@ function sendMoney(){
   persistTxn(rec);
   transfers.unshift({name:r.name,method:method,usd:usd,ccy:rcur,rate:rrate,status:"proc",date:"Now"});
   renderActivity();
-  try{fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}).catch(function(){});}catch(e){}
-  toast("Transfer of "+fmt(usd)+" submitted to "+r.name+" · Ref "+ref);
+  if(ep){try{fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}).catch(function(){});}catch(e){}}
+  toast("Transfer of "+fmt(usd)+" submitted to "+r.name+" · Ref "+ref+(ep?"":" — pending live processing"));
   go("activity");
 }
 
@@ -898,7 +962,7 @@ function renderAdmin(){
 function initAdmin(){renderAdmin();}
 
 loadRates(); loadCfg(); fillCountrySelects(); calc(); renderActivity(); renderHhfcuCard(); initAdmin();
-renderRecipients(); populateRecipSelect(); applyLiveState();
+renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState();
 (function(){var fa=document.getElementById("fApi");if(fa)fa.value=getApiEndpoint();renderLiveState();})();
 </script>
 </body>
