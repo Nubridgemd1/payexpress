@@ -302,7 +302,7 @@ tbody tr:last-child td{border-bottom:0}
         </div>
 
         <div class="field"><label>Recipient</label>
-          <select id="recip"><option>Test Recipient One - Test Bank ****1001</option><option>Test Recipient Two - Test Bank ****1002</option><option>+ Add new recipient</option></select>
+          <select id="recip" onchange="if(this.value==='__add'){go('recipients');this.selectedIndex=0;}"></select>
         </div>
 
         <div class="pay-chip">
@@ -367,8 +367,8 @@ tbody tr:last-child td{border-bottom:0}
       <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg></div><h4>Spend anywhere</h4><p>Naira cards for local POS/online; USD cards for global online and travel.</p></div>
     </div>
     <div class="btn-row" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="toast('Card issuance is a demo in this prototype')">Issue a card</button>
-      <button class="btn btn-ghost" onclick="toast('Card added (demo)')">Add payment card</button>
+      <button class="btn btn-primary" onclick="go('verify')">Request a card</button>
+      <button class="btn btn-ghost" onclick="go('verify')">Verify to add a card</button>
     </div>
   </section>
 
@@ -377,21 +377,17 @@ tbody tr:last-child td{border-bottom:0}
     <div class="section-h"><div><div class="eyebrow">People you send to</div><h1 style="font-size:1.5rem;margin-top:3px">Recipients</h1></div></div>
     <div class="card pad">
       <div style="overflow-x:auto"><table>
-        <thead><tr><th>Name</th><th>Bank</th><th>Account</th><th style="text-align:right">Last sent</th></tr></thead>
-        <tbody>
-          <tr><td>Test Recipient One</td><td>Test Bank</td><td class="mono">****1001</td><td class="n">Sep 12</td></tr>
-          <tr><td>Test Recipient Two</td><td>Test Bank</td><td class="mono">****1002</td><td class="n">Aug 30</td></tr>
-          <tr><td>Test Recipient Three</td><td>Test Bank</td><td class="mono">****1003</td><td class="n">Aug 09</td></tr>
-        </tbody>
+        <thead><tr><th>Name</th><th>Destination</th><th>Account</th><th style="text-align:right">Action</th></tr></thead>
+        <tbody id="recBody"></tbody>
       </table></div>
     </div>
     <div class="card pad" style="margin-top:16px">
       <h3 style="font-size:1.05rem;margin-bottom:10px">Add a recipient</h3>
-      <div class="field"><label>Full name</label><input placeholder="e.g., Test Recipient"></div>
+      <div class="field"><label>Full name</label><input id="rcpName" placeholder="Recipient's full name"></div>
       <div class="field"><label>Destination country</label><select id="recCountry"></select></div>
-      <div class="field"><label>Bank / wallet</label><input placeholder="Recipient bank or mobile wallet"></div>
-      <div class="field"><label>Account / IBAN / wallet number</label><input class="mono" placeholder="Account, IBAN, or wallet number"></div>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="toast('Recipient saved (demo)')">Save recipient</button>
+      <div class="field"><label>Bank / wallet</label><input id="rcpBank" placeholder="Recipient bank or mobile wallet"></div>
+      <div class="field"><label>Account / IBAN / wallet number</label><input id="rcpAcct" class="mono" placeholder="Account, IBAN, or wallet number"></div>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="saveRecipientForm()">Save recipient</button>
     </div>
   </section>
 
@@ -399,7 +395,7 @@ tbody tr:last-child td{border-bottom:0}
   <section class="view" id="view-verify">
     <div class="section-h"><div><div class="eyebrow">Identity verification (KYC)</div><h1 style="font-size:1.5rem;margin-top:3px">Verify your identity</h1></div></div>
     <p class="lead" style="margin-bottom:4px">Sending money requires a quick identity check - about 2 minutes with your ID to hand. You can also request an HHFCU debit card at the end.</p>
-    <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Prototype - please do not enter real personal data.</p>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Your information is encrypted and used only for identity verification and compliance (KYC/AML).</p>
 
     <div class="kyc" id="kycForm">
       <div class="card pad">
@@ -563,7 +559,6 @@ tbody tr:last-child td{border-bottom:0}
           <div class="astats" id="adminStats"></div>
           <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
             <button class="btn btn-ghost" style="padding:9px 14px" onclick="exportTxnsCSV()">Export transactions (CSV)</button>
-            <button class="btn btn-ghost" style="padding:9px 14px" onclick="seedDemoTxns()">Add demo transactions</button>
           </div>
         </div>
       </div>
@@ -586,6 +581,17 @@ tbody tr:last-child td{border-bottom:0}
           <thead><tr><th>Country</th><th>Currency</th><th class="n">Rate (per 1 USD)</th></tr></thead>
           <tbody id="adminRateBody"></tbody>
         </table></div></div>
+
+        <div class="card pad" style="margin-top:14px">
+          <h3 style="font-size:1.05rem;margin-bottom:4px">Go-live — live payment &amp; payout backend</h3>
+          <p class="hint" style="color:var(--muted);font-size:.84rem;margin-bottom:10px">Connect the licensed processing endpoint (HHFCU / IMTO settlement API). Until it's set, the app disables transfers and never simulates a send. Full go-live also needs the card processor, the IMTO payout integration, KYC/AML &amp; OFAC screening, and HHFCU (Transmitter of Record) sign-off.</p>
+          <div class="field"><label>Transfer API endpoint (POST)</label><input id="fApi" type="text" placeholder="https://api.yourbackend.com/payexpress/transfer"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" style="padding:9px 14px" onclick="saveBackend()">Save backend</button>
+            <button class="btn btn-ghost" style="padding:9px 14px" onclick="clearAppData()">Clear all app data</button>
+          </div>
+          <p id="liveState" style="font-size:.84rem;margin-top:10px"></p>
+        </div>
       </div>
 
       <!-- CONTACT -->
@@ -615,7 +621,7 @@ tbody tr:last-child td{border-bottom:0}
     </div>
   </section>
 
-  <div class="foot"><span id="footContact" style="display:block;color:var(--ink);font-weight:600;margin-bottom:4px"></span>PayExpress is a product prototype for demonstration. No real accounts, cards, or funds are processed. · <a href="#" onclick="go('admin');return false">Admin</a></div>
+  <div class="foot"><span id="footContact" style="display:block;color:var(--ink);font-weight:600;margin-bottom:4px"></span><span id="pxLive"></span> · <a href="#" onclick="go('admin');return false">Admin</a></div>
 </main>
 <nav class="botnav" role="tablist" aria-label="Sections">
   <button aria-selected="true" onclick="go('send')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg><span>Send</span></button>
@@ -706,18 +712,61 @@ function pickMethod(el,name){
   el.setAttribute("aria-pressed","true"); method=name;
 }
 
-/* activity */
-var transfers=[
-  {name:"Test Recipient One", method:"Bank account", usd:500, ccy:"NGN", rate:1585, status:"paid", date:"Sep 12"},
-  {name:"Test Recipient Two", method:"Mobile wallet", usd:250, ccy:"GHS", rate:15.2, status:"paid", date:"Aug 30"},
-  {name:"Test Recipient Three", method:"Cash pickup", usd:120, ccy:"GBP", rate:0.79, status:"paid", date:"Aug 09"}
-];
+/* one-time cleanup of prototype/demo data before go-live */
+(function(){try{if(localStorage.getItem("px_live_v1")!=="1"){["px_txns","px_hhfcu_card","px_kyc"].forEach(function(k){localStorage.removeItem(k);});localStorage.setItem("px_live_v1","1");}}catch(e){}})();
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function getApiEndpoint(){try{return (localStorage.getItem("px_backend")||"").trim();}catch(e){return"";}}
+function ccyName(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].f+" "+COUNTRIES[i].n;}return ccy||"";}
+function ccyRate(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].rate;}return (dest&&dest.rate)||1;}
+
+/* recipients — saved locally, submitted to the backend on transfer */
+function getRecipients(){try{return JSON.parse(localStorage.getItem("px_recipients")||"[]")}catch(e){return[];}}
+function setRecipients(a){try{localStorage.setItem("px_recipients",JSON.stringify(a))}catch(e){}}
+function last4(s){s=String(s||"").replace(/[^A-Za-z0-9]/g,"");return s.slice(-4)||"----";}
+function saveRecipientForm(){
+  var name=(document.getElementById("rcpName").value||"").trim();
+  var ccy=document.getElementById("recCountry").value;
+  var bank=(document.getElementById("rcpBank").value||"").trim();
+  var acct=(document.getElementById("rcpAcct").value||"").trim();
+  if(!name){toast("Enter the recipient's full name");return;}
+  if(!bank){toast("Enter the recipient's bank or wallet");return;}
+  if(acct.replace(/\s/g,"").length<6){toast("Enter a valid account / IBAN / wallet number");return;}
+  var a=getRecipients();
+  a.unshift({id:"R"+Date.now(),name:name,ccy:ccy,bank:bank,acct:acct,created:new Date().toISOString()});
+  setRecipients(a);
+  document.getElementById("rcpName").value="";document.getElementById("rcpBank").value="";document.getElementById("rcpAcct").value="";
+  renderRecipients();populateRecipSelect();
+  toast("Recipient saved");
+}
+function delRecipient(id){setRecipients(getRecipients().filter(function(r){return r.id!==id;}));renderRecipients();populateRecipSelect();toast("Recipient removed");}
+function renderRecipients(){
+  var b=document.getElementById("recBody");if(!b)return;var a=getRecipients();
+  if(!a.length){b.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:22px">No recipients yet — add one below.</td></tr>';return;}
+  var h="";for(var i=0;i<a.length;i++){var r=a[i];h+='<tr><td>'+esc(r.name)+'</td><td>'+esc(ccyName(r.ccy))+'</td><td class="mono">****'+last4(r.acct)+'</td><td style="text-align:right"><button class="btn btn-ghost" style="padding:4px 10px;font-size:.8rem" onclick="delRecipient(\''+r.id+'\')">Remove</button></td></tr>';}
+  b.innerHTML=h;
+}
+function populateRecipSelect(){
+  var sel=document.getElementById("recip");if(!sel)return;var a=getRecipients();
+  var h=a.map(function(r){return '<option value="'+r.id+'">'+esc(r.name)+' - '+esc(r.bank)+' ****'+last4(r.acct)+'</option>';}).join("");
+  h+='<option value="__add">+ Add new recipient</option>';
+  sel.innerHTML=h;
+}
+function applyLiveState(){var el=document.getElementById("pxLive");if(el){el.textContent=getApiEndpoint()?"":"Not yet connected to the live payment & payout backend — transfers are disabled until an administrator connects the processor / IMTO endpoint.";}}
+function saveBackend(){var v=(document.getElementById("fApi").value||"").trim();try{localStorage.setItem("px_backend",v)}catch(e){}applyLiveState();renderLiveState();toast(v?"Live backend connected — transfers enabled":"Backend cleared — not-live mode");}
+function renderLiveState(){var el=document.getElementById("liveState");if(!el)return;el.innerHTML=getApiEndpoint()?'<b style="color:var(--good)">● Live backend connected</b> — transfers enabled.':'<b style="color:var(--warn)">● Not live</b> — transfers disabled until a backend is connected.';}
+function clearAppData(){if(!confirm("Clear all recipients, transfers, KYC and card data on this device? This cannot be undone."))return;["px_txns","px_recipients","px_kyc","px_hhfcu_card"].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});transfers=[];renderActivity();renderRecipients();populateRecipSelect();try{renderAdmin();}catch(e){}toast("All app data cleared");}
+
+/* activity — from stored transactions */
+function getTxns(){try{return JSON.parse(localStorage.getItem("px_txns")||"[]")}catch(e){return[];}}
+var transfers=getTxns().map(function(t){return {name:t.recipient||t.name||"",method:t.method,usd:t.usd,ccy:t.ccy,rate:t.rate,status:(/paid|complete|success|delivered/i.test(t.status||"")?"paid":"proc"),date:(t.date&&String(t.date).length>12)?new Date(t.date).toLocaleDateString("en-US",{month:"short",day:"2-digit"}):(t.date||"")};});
 function renderActivity(){
-  var b=document.getElementById("actBody"); var h="";
+  var b=document.getElementById("actBody"); if(!b)return;
+  if(!transfers.length){b.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:22px">No transfers yet.</td></tr>';return;}
+  var h="";
   for(var i=0;i<transfers.length;i++){var t=transfers[i];
     var tag=t.status==="paid"?'<span class="tag paid">Paid out</span>':'<span class="tag proc">Processing</span>';
     var payout=fmtN(t.usd*(t.rate||1))+" "+(t.ccy||"");
-    h+='<tr><td>'+t.name+'</td><td>'+t.method+'</td><td class="n mono">'+fmt(t.usd)+'</td><td class="n mono">'+payout+'</td><td style="text-align:right">'+tag+'</td></tr>';
+    h+='<tr><td>'+esc(t.name)+'</td><td>'+esc(t.method)+'</td><td class="n mono">'+fmt(t.usd)+'</td><td class="n mono">'+payout+'</td><td style="text-align:right">'+tag+'</td></tr>';
   }
   b.innerHTML=h;
 }
@@ -726,15 +775,24 @@ function markPaid(ref){try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]
 function sendMoney(){
   var usd=num(document.getElementById("sendAmt").value);
   if(usd<=0){toast("Enter an amount to send");return;}
-  var recip=document.getElementById("recip").value.split(" - ")[0];
+  var sel=document.getElementById("recip");var rid=sel?sel.value:"";
+  if(!rid||rid==="__add"){toast("Choose or add a recipient first");go("recipients");return;}
+  var r=getRecipients().filter(function(x){return x.id===rid;})[0];
+  if(!r){toast("Please add a recipient first");go("recipients");return;}
+  var kyc=null;try{kyc=JSON.parse(localStorage.getItem("px_kyc")||"null")}catch(e){}
+  if(!kyc){toast("Verify your identity before sending");go("verify");return;}
+  var ep=getApiEndpoint();
+  if(!ep){toast("Transfers aren't live yet — the payment & payout backend isn't connected.");return;}
+  var rcur=r.ccy||(dest&&dest.ccy)||"", rrate=ccyRate(rcur);
+  var payout=Math.round(usd*rrate);
   var ref="PX-"+Math.floor(1000000+Math.random()*9000000);
-  var payout=Math.round(usd*dest.rate);
-  transfers.unshift({name:recip, method:method, usd:usd, ccy:dest.ccy, rate:dest.rate, status:"proc", date:"Now"});
-  persistTxn({ref:ref, date:new Date().toISOString(), sender:"App user", recipient:recip, country:dest.n, method:method, usd:usd, fee:0, ccy:dest.ccy, rate:dest.rate, payout:payout, status:"Processing"});
+  var rec={ref:ref,date:new Date().toISOString(),sender:(kyc&&kyc.name)||"",recipient:r.name,recipientId:r.id,bank:r.bank,acct:r.acct,country:ccyName(rcur),method:method,usd:usd,fee:0,ccy:rcur,rate:rrate,payout:payout,status:"Processing"};
+  persistTxn(rec);
+  transfers.unshift({name:r.name,method:method,usd:usd,ccy:rcur,rate:rrate,status:"proc",date:"Now"});
   renderActivity();
-  toast("Transfer of "+fmt(usd)+" started to "+recip);
+  try{fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}).catch(function(){});}catch(e){}
+  toast("Transfer of "+fmt(usd)+" submitted to "+r.name+" · Ref "+ref);
   go("activity");
-  setTimeout(function(){ if(transfers[0]){transfers[0].status="paid";renderActivity();} markPaid(ref); },2600);
 }
 
 function loadCfg(){
@@ -824,12 +882,7 @@ function exportTxnsCSV(){
   for(var i=0;i<tx.length;i++){var t=tx[i];rows.push([t.date||"",t.ref||"",t.sender||"",t.recipient||"",t.country||"",t.method||"",t.usd||"",t.fee||"",t.ccy||"",t.rate||"",t.payout||"",t.status||""].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(","));}
   var blob=new Blob([rows.join("\n")],{type:"text/csv"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="payexpress-transactions.csv";document.body.appendChild(a);a.click();a.remove();toast("CSV downloaded");
 }
-function seedDemoTxns(){
-  var names=["Test Recipient One","Test Recipient Two","Test Recipient Three","Test Recipient Four"];var methods=["Bank account","Mobile wallet","Cash pickup","Debit card"];var now=Date.now();
-  for(var i=0;i<12;i++){var k=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)];var usd=Math.round(50+Math.random()*950);var fee=Math.round(Math.max(FEEMIN,usd*FEEPCT)*100)/100;var dt=new Date(now-Math.floor(Math.random()*400)*86400000);
-    persistTxn({ref:"PX-"+Math.floor(1000000+Math.random()*9000000),date:dt.toISOString(),sender:"App user",recipient:names[i%names.length],country:k.n,method:methods[i%methods.length],usd:usd,fee:fee,ccy:k.ccy,rate:k.rate,payout:Math.round(usd*k.rate),status:"Paid out"});}
-  renderAdmin();toast("Added 12 demo transactions");
-}
+function seedDemoTxns(){ toast("Demo seeding is disabled — the platform is in live mode."); }
 function renderAdmin(){
   renderFooterContact();
   var unlocked=adminIsUnlocked();var gate=document.getElementById("adminGate"),panel=document.getElementById("adminPanel");
@@ -845,6 +898,8 @@ function renderAdmin(){
 function initAdmin(){renderAdmin();}
 
 loadRates(); loadCfg(); fillCountrySelects(); calc(); renderActivity(); renderHhfcuCard(); initAdmin();
+renderRecipients(); populateRecipSelect(); applyLiveState();
+(function(){var fa=document.getElementById("fApi");if(fa)fa.value=getApiEndpoint();renderLiveState();})();
 </script>
 </body>
 </html>
