@@ -7,7 +7,13 @@
 <meta name="description" content="PayExpress - fast, low-cost money transfers worldwide, with card services and easy payout-partner integration." />
 <meta name="theme-color" content="#0b3b8c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="PayExpress" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
@@ -1006,6 +1012,22 @@ loadRates(); loadCfg(); fillCountrySelects(); calc(); renderActivity(); renderHh
 renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState();
 (function(){var fa=document.getElementById("fApi");if(fa)fa.value=getApiEndpoint();var fs=document.getElementById("fStatus");if(fs)fs.value=getStatusUrl();var fr=document.getElementById("fResolve");if(fr)fr.value=getResolveUrl();renderLiveState();})();
 pollStatuses(); setInterval(pollStatuses, 60000);
+</script>
+<!-- PWA: install affordance + service worker -->
+<button id="pwaInstall" type="button" aria-label="Install the PayExpress app" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));z-index:9999;border:none;border-radius:999px;padding:12px 20px;font-family:inherit;font-weight:700;font-size:14px;color:#fff;background:linear-gradient(135deg,#0b3b8c,#2b7de9);box-shadow:0 8px 24px rgba(11,59,140,.35);cursor:pointer">⬇&nbsp; Install PayExpress</button>
+<script>
+(function(){
+  "use strict";
+  // Install prompt (Android/desktop Chromium)
+  var deferred=null, btn=document.getElementById("pwaInstall");
+  function standalone(){ return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone===true; }
+  window.addEventListener("beforeinstallprompt",function(e){ e.preventDefault(); deferred=e; if(btn && !standalone()) btn.style.display="inline-block"; });
+  if(btn){ btn.addEventListener("click",function(){ if(!deferred) return; deferred.prompt(); deferred.userChoice.finally(function(){ deferred=null; btn.style.display="none"; }); }); }
+  window.addEventListener("appinstalled",function(){ if(btn) btn.style.display="none"; });
+  if(standalone() && btn){ btn.style.display="none"; }
+  // Service worker
+  if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+})();
 </script>
 </body>
 </html>
