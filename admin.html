@@ -206,7 +206,10 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
   <!-- TRANSACTIONS -->
   <section class="view" id="view-transactions">
     <div class="section-h"><div><div class="eyebrow">Money movement</div><h1 class="pg">Transactions</h1></div>
-      <button class="btn btn-ghost" onclick="exportCSV()">Export CSV</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="clearTx()">Clear all</button>
+        <button class="btn btn-ghost" onclick="exportCSV()">Export CSV</button>
+      </div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
       <div class="chips" id="filters">
@@ -342,17 +345,9 @@ var fmtN=function(n){return Math.round(n).toLocaleString("en-US");};
 var num=function(s){return parseFloat(String(s).replace(/[^\d.]/g,""))||0;};
 
 /* transactions store (shared with the app via px_txns) */
-var SEED=[
-  {ref:"PX-8842013",date:"2026-09-28T10:02:00Z",sender:"App user",recipient:"Test Recipient One",country:"Nigeria",method:"Bank account",usd:500,fee:0,ccy:"NGN",rate:1585,payout:792500,status:"Settled"},
-  {ref:"PX-8839902",date:"2026-09-26T18:20:00Z",sender:"App user",recipient:"Test Recipient Two",country:"Ghana",method:"Mobile wallet",usd:250,fee:0,ccy:"GHS",rate:15.2,payout:3800,status:"Paid out"},
-  {ref:"PX-8837781",date:"2026-09-20T14:05:00Z",sender:"App user",recipient:"Test Recipient Three",country:"United Kingdom",method:"Bank account",usd:1200,fee:0,ccy:"GBP",rate:0.79,payout:948,status:"Paid out"},
-  {ref:"PX-8835540",date:"2026-09-12T21:41:00Z",sender:"App user",recipient:"Test Recipient Four",country:"India",method:"Cash pickup",usd:120,fee:0,ccy:"INR",rate:88,payout:10560,status:"Processing"},
-  {ref:"PX-8833219",date:"2026-08-30T09:15:00Z",sender:"App user",recipient:"Test Recipient Five",country:"Mexico",method:"Bank account",usd:800,fee:0,ccy:"MXN",rate:18.3,payout:14640,status:"Settled"},
-  {ref:"PX-8831007",date:"2026-08-18T16:48:00Z",sender:"App user",recipient:"Test Recipient Six",country:"Philippines",method:"Debit card",usd:60,fee:0,ccy:"PHP",rate:58,payout:3480,status:"Failed"},
-  {ref:"PX-8829884",date:"2026-07-11T11:02:00Z",sender:"App user",recipient:"Test Recipient Seven",country:"Kenya",method:"Mobile wallet",usd:340,fee:0,ccy:"KES",rate:129,payout:43860,status:"Refunded"},
-  {ref:"PX-8827650",date:"2026-05-10T19:30:00Z",sender:"App user",recipient:"Test Recipient Eight",country:"Nigeria",method:"Bank account",usd:2000,fee:0,ccy:"NGN",rate:1585,payout:3170000,status:"Paid out"}
-];
-function getTx(){try{var a=JSON.parse(localStorage.getItem("px_txns")||"null");if(!a||!a.length){localStorage.setItem("px_txns",JSON.stringify(SEED));return SEED.slice();}return a;}catch(e){return SEED.slice();}}
+/* Live ledger — real transfers initiated in the PayExpress app populate px_txns. No demo/seed data. */
+function getTx(){try{return JSON.parse(localStorage.getItem("px_txns")||"[]");}catch(e){return [];}}
+function clearTx(){if(!confirm("Clear all transactions on this device? This removes any demo/test data. Real transfers made in the app will repopulate the list automatically."))return;try{localStorage.removeItem("px_txns");}catch(e){}renderTx();renderKpis();toast("Transactions cleared");}
 function saveTx(a){try{localStorage.setItem("px_txns",JSON.stringify(a))}catch(e){}}
 var STATUSES=["Settled","Processing","Paid out","Failed","Refunded"];
 function cls(s){return "t-"+String(s).toLowerCase().replace(/ /g,"");}
@@ -368,7 +363,8 @@ function renderTx(){
     var opts="";for(var k=0;k<STATUSES.length;k++){opts+='<option'+(STATUSES[k]===t.status?" selected":"")+'>'+STATUSES[k]+'</option>';}
     rows+='<tr><td class="mono">'+t.ref+'</td><td>'+ds+'</td><td>'+(t.sender||"-")+'</td><td>'+t.recipient+'</td><td>'+(t.country||"-")+'</td><td>'+(t.method||"-")+'</td><td class="n mono">'+fmt(t.usd)+'</td><td class="n mono">'+payoutText(t)+'</td><td><span class="tag '+cls(t.status)+'">'+t.status+'</span></td><td><select class="st" onchange="setStatus(\''+t.ref+'\',this.value)">'+opts+'</select></td></tr>';
   }
-  document.getElementById("txBody").innerHTML=rows||'<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">No transactions match.</td></tr>';
+  var empty=all.length===0?'No transactions yet — transfers made in the PayExpress app appear here automatically.':'No transactions match your filter or search.';
+  document.getElementById("txBody").innerHTML=rows||'<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">'+empty+'</td></tr>';
 }
 function setStatus(ref,status){var a=getTx();for(var i=0;i<a.length;i++){if(a[i].ref===ref){a[i].status=status;break;}}saveTx(a);renderTx();renderKpis();toast(ref+" set to "+status);}
 
