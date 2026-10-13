@@ -8,7 +8,8 @@
 <meta name="robots" content="noindex,nofollow" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{
   --blue-dark:#0b3b8c; --blue:#2b7de9; --blue-light:#6fb4f2; --blue-wash:#e7f0fd;
@@ -110,6 +111,36 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(150%);background:var(--ink);color:var(--ground);padding:13px 20px;border-radius:11px;box-shadow:var(--shadow);font-weight:600;font-size:.9rem;z-index:70;transition:transform .3s}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .hidden{display:none}
+
+/* ---- Marketing kit ---- */
+.mkt-sub{display:flex;gap:8px;margin:0 0 18px;flex-wrap:wrap}
+.msub{display:none}.msub.active{display:block}
+.flyer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px}
+.flyer-wrap{display:flex;flex-direction:column;align-items:center}
+.flyer-scale{width:210px;height:262px;overflow:hidden;border-radius:12px;box-shadow:var(--shadow);position:relative;border:1px solid var(--line)}
+.flyer{width:1080px;height:1350px;position:absolute;top:0;left:0;transform:scale(.19444);transform-origin:top left}
+.fl-btns{margin-top:10px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.fl-btns button{border:1px solid var(--line2);background:var(--card);color:var(--blue-dark);padding:7px 12px;border-radius:999px;cursor:pointer;font-size:.76rem;font-weight:700;min-height:34px}
+.fl-btns button:hover{background:var(--blue-wash)}
+#flyerStage{position:fixed;left:-99999px;top:0;z-index:-1}
+.vid{border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.vid>summary{list-style:none;cursor:pointer;padding:15px 16px;display:flex;align-items:center;gap:13px}
+.vid>summary::-webkit-details-marker{display:none}
+.vid .vnum{font-family:var(--disp);font-weight:700;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-dark));min-width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:.92rem;flex:none}
+.vid .vtt{flex:1;min-width:0}.vid .vtt b{font-family:var(--disp);color:var(--ink);font-size:1rem;display:block}
+.vid .vtt small{color:var(--muted);font-size:.78rem}
+.vid .vopen{color:var(--muted);font-size:.8rem;flex:none}
+.vid[open] .vopen{transform:rotate(180deg)}
+.vid .vbody{padding:4px 16px 16px;border-top:1px solid var(--line)}
+.vid h5{font-size:.71rem;text-transform:uppercase;letter-spacing:.09em;color:var(--blue-dark);margin:15px 0 5px;font-weight:700}
+.vid p,.vid li{font-size:.87rem;color:var(--body);margin:3px 0}
+.vid .lead{color:var(--ink);font-weight:600}
+.vid ul{margin:3px 0;padding-left:19px}
+.vid .tags code{font-size:.8rem;color:var(--blue-dark);background:var(--blue-wash);padding:2px 6px;border-radius:6px}
+.vid .vact{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.vid .vact button{border:1px solid var(--line2);background:var(--card);color:var(--blue-dark);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:.8rem;font-weight:700;min-height:38px}
+.vid .vact button.pri{background:var(--blue);color:#fff;border-color:var(--blue)}
+.kit-note{font-size:.82rem;color:var(--muted);margin:0 0 16px}
 </style>
 </head>
 <body>
@@ -144,6 +175,7 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
     <button role="tab" aria-selected="false" onclick="go('transactions',this)">Transactions</button>
     <button role="tab" aria-selected="false" onclick="go('rates',this)">Rates &amp; Fees</button>
     <button role="tab" aria-selected="false" onclick="go('contact',this)">Contact</button>
+    <button role="tab" aria-selected="false" onclick="go('marketing',this)">Marketing</button>
     <button role="tab" aria-selected="false" onclick="go('login',this)">Login</button>
   </div>
 </div>
@@ -221,6 +253,25 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
     </div>
   </section>
 
+  <!-- MARKETING KIT -->
+  <section class="view" id="view-marketing">
+    <div class="section-h"><div><div class="eyebrow">Promote PayExpress</div><h1 class="pg">Marketing Kit</h1></div></div>
+    <div class="mkt-sub chips">
+      <button class="chip" aria-pressed="true" onclick="mktTab('flyers',this)">🖼️ Flyers (20)</button>
+      <button class="chip" aria-pressed="false" onclick="mktTab('videos',this)">🎬 YouTube Videos (20)</button>
+    </div>
+
+    <div class="msub active" id="msub-flyers">
+      <p class="kit-note">20 ready-to-share social flyers (1080×1350) with the best-rate guarantee. Download a crisp PNG, print, or share straight to a device.</p>
+      <div class="flyer-grid" id="flyerGrid"></div>
+    </div>
+
+    <div class="msub" id="msub-videos">
+      <p class="kit-note">20 full YouTube production packages — hook, script, storyboard, on-screen text, description, tags and thumbnail concept. Copy into CapCut / Canva / Premiere and record. “Copy full package” grabs everything.</p>
+      <div id="videoList"></div>
+    </div>
+  </section>
+
   <!-- LOGIN -->
   <section class="view" id="view-login">
     <div class="section-h"><div><div class="eyebrow">Security</div><h1 class="pg">Admin login</h1></div></div>
@@ -234,6 +285,7 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
   </section>
 </main>
 
+<div id="flyerStage"></div>
 <div class="toast" id="toast"></div>
 <script>
 /* ---- shared storage keys with the customer app (same origin): px_txns, px_rates, px_contact, px_admin_pass ---- */
@@ -361,7 +413,240 @@ function changePassword(){var cur=document.getElementById("pw-cur").value,nw=doc
 /* CSV export */
 function exportCSV(){var tx=getTx();var head=["Date","Reference","Sender","Recipient","Country","Method","USD","Fee","Currency","Rate","Payout","Status"];var rows=[head.join(",")];for(var i=0;i<tx.length;i++){var t=tx[i];rows.push([t.date||"",t.ref||"",t.sender||"",t.recipient||"",t.country||"",t.method||"",t.usd||"",t.fee||0,t.ccy||"",t.rate||"",(t.payout!=null?t.payout:(t.ngn||"")),t.status||""].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(","));}var blob=new Blob([rows.join("\n")],{type:"text/csv"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="payexpress-transactions.csv";document.body.appendChild(a);a.click();a.remove();toast("CSV downloaded");}
 
-function boot(){ loadRates(); renderKpis(); renderTx(); renderRateEditor(); fillContact(); }
+/* ===================== MARKETING KIT ===================== */
+function mktTab(name,btn){
+  var subs=document.querySelectorAll(".msub");for(var i=0;i<subs.length;i++)subs[i].classList.remove("active");
+  document.getElementById("msub-"+name).classList.add("active");
+  var c=document.querySelectorAll(".mkt-sub .chip");for(var j=0;j<c.length;j++)c[j].setAttribute("aria-pressed","false");
+  if(btn)btn.setAttribute("aria-pressed","true");
+}
+
+/* ---- Flyers ---- */
+function flyerLogo(c){return '<svg viewBox="0 0 40 40" style="width:100%;height:100%" fill="none">'+
+ '<path d="M3 15c2.7-3.3 5.4-3.3 8.1 0s5.4 3.3 8.1 0 5.4-3.3 8.1 0 5.4 3.3 8.1 0" stroke="'+c+'" stroke-width="2.7" stroke-linecap="round"/>'+
+ '<path d="M3 21c2.7-3.3 5.4-3.3 8.1 0s5.4 3.3 8.1 0 5.4-3.3 8.1 0 5.4 3.3 8.1 0" stroke="'+c+'" stroke-width="2.7" stroke-linecap="round" opacity=".7"/>'+
+ '<path d="M3 27c2.7-3.3 5.4-3.3 8.1 0s5.4 3.3 8.1 0 5.4-3.3 8.1 0 5.4 3.3 8.1 0" stroke="'+c+'" stroke-width="2.7" stroke-linecap="round" opacity=".44"/></svg>';}
+var NAVY={bg:"linear-gradient(150deg,#0a2f6e,#0b3b8c 55%,#1c5bbf)",ink:"#ffffff",sub:"#cfe0fa",acc:"#ffce45",accInk:"#3a2b00",logo:"#ffffff",line:"rgba(255,255,255,.3)"};
+var SKY ={bg:"linear-gradient(150deg,#2b7de9,#57a0f4)",ink:"#ffffff",sub:"#eef5ff",acc:"#ffd957",accInk:"#3a2b00",logo:"#ffffff",line:"rgba(255,255,255,.34)"};
+var SNOW={bg:"linear-gradient(160deg,#eef5ff,#d9e9fd)",ink:"#0b2e63",sub:"#3f5b86",acc:"#1766d6",accInk:"#ffffff",logo:"#0b3b8c",line:"rgba(11,46,99,.22)"};
+function flyerShell(f){var t=f.th;return '<div class="flyer" style="background:'+t.bg+';color:'+t.ink+';padding:92px 80px;display:flex;flex-direction:column">'+
+  '<div style="display:flex;align-items:center;gap:22px">'+
+    '<div style="width:90px;height:90px">'+flyerLogo(t.logo)+'</div>'+
+    '<div><div style="font-family:var(--disp);font-weight:800;font-size:60px;line-height:1;color:'+t.ink+'">PayExpress</div>'+
+    '<div style="font-size:22px;letter-spacing:.03em;color:'+t.sub+';margin-top:8px">US → Nigeria &amp; 20+ countries</div></div>'+
+  '</div>'+
+  '<div style="display:inline-flex;align-self:flex-start;align-items:center;gap:12px;margin-top:48px;background:'+t.acc+';color:'+t.accInk+';font-family:var(--disp);font-weight:800;font-size:30px;padding:16px 30px;border-radius:999px">★ BEST‑RATE GUARANTEE</div>'+
+  '<div style="margin-top:38px">'+
+    (f.kicker?'<div style="font-size:29px;letter-spacing:.14em;text-transform:uppercase;color:'+t.acc+';font-weight:800;margin-bottom:16px">'+f.kicker+'</div>':'')+
+    '<div style="font-family:var(--disp);font-weight:800;font-size:'+(f.hlSize||94)+'px;line-height:1.02;color:'+t.ink+'">'+f.hl+'</div>'+
+    '<div style="font-size:42px;line-height:1.45;color:'+t.sub+';margin-top:28px;max-width:17em">'+f.sub+'</div>'+
+  '</div>'+
+  '<div style="margin-top:auto;display:flex;justify-content:space-between;align-items:center;border-top:2px solid '+t.line+';padding-top:34px;font-size:27px;font-weight:600;color:'+t.ink+'">'+
+    '<span>payexpress.org</span><span style="color:'+t.sub+'">Powered by BizFormCorp × HHFCU</span></div>'+
+'</div>';}
+var FLYERS=[
+ {th:NAVY,kicker:"Show us a better rate",hl:"We beat<br>any rate.",sub:"Find a better rate to send money home? We’ll beat it — guaranteed.",hlSize:118,name:"beat-any-rate"},
+ {th:SKY ,hl:"Send money home in minutes.",sub:"To Nigeria &amp; 20+ countries — bank, wallet or cash pickup.",hlSize:86,name:"send-in-minutes"},
+ {th:SNOW,hl:"Zero transfer fees.",sub:"You send. They get more. No hidden charges, ever.",hlSize:98,name:"zero-fees"},
+ {th:NAVY,kicker:"Found a better rate?",hl:"We’ll beat it.",sub:"Every dollar goes further with PayExpress.",hlSize:110,name:"found-better"},
+ {th:SKY ,hl:"More naira<br>per dollar.",sub:"Market-beating rates, delivered in minutes.",hlSize:104,name:"more-naira"},
+ {th:SNOW,hl:"Your family deserves more.",sub:"Better rates mean more lands in their account.",hlSize:82,name:"family-more"},
+ {th:NAVY,hl:"The smart way to send money home.",sub:"Fast. Secure. Best rate — guaranteed.",hlSize:76,name:"smart-way"},
+ {th:SKY ,kicker:"Rate too good to be true?",hl:"That’s the point.",sub:"We beat any rate out there. Try us.",hlSize:94,name:"too-good"},
+ {th:SNOW,hl:"Bank • Wallet • Cash pickup.",sub:"However they want it — delivered fast.",hlSize:72,name:"three-ways"},
+ {th:NAVY,hl:"Licensed. Secure. Trusted.",sub:"Backed by Heritage Hub FCU. Your money is protected.",hlSize:80,name:"licensed"},
+ {th:SKY ,hl:"Beat the banks.<br>Beat the apps.",sub:"PayExpress beats any rate — guaranteed.",hlSize:84,name:"beat-banks"},
+ {th:SNOW,hl:"US to Naija in minutes.",sub:"Send love. Send more. Send PayExpress.",hlSize:84,name:"us-to-naija"},
+ {th:NAVY,hl:"Every naira counts.",sub:"We squeeze out the best rate so your family gets more.",hlSize:98,name:"every-naira"},
+ {th:SKY ,kicker:"Switch & save",hl:"Whatever rate you get now — we’ll beat it.",sub:"Save on every single transfer.",hlSize:70,name:"switch-save"},
+ {th:SNOW,hl:"Send money home at a rate no one beats.",sub:"Download PayExpress today.",hlSize:70,name:"no-one-beats"},
+ {th:NAVY,hl:"Dollars in.<br>More naira out.",sub:"Best-rate guarantee on every transfer.",hlSize:98,name:"dollars-in"},
+ {th:SKY ,hl:"No fees. No surprises. Best rate.",sub:"What you send is what they get — and more.",hlSize:74,name:"no-surprises"},
+ {th:SNOW,hl:"Send to 20+ countries.",sub:"Nigeria, Ghana, Kenya, UK &amp; more — always the best rate.",hlSize:86,name:"twenty-countries"},
+ {th:NAVY,kicker:"Why pay more?",hl:"We beat any rate. Keep more in the family.",sub:"Switch to PayExpress today.",hlSize:70,name:"why-pay-more"},
+ {th:SKY ,hl:"Try us — we’ll beat your rate.",sub:"Download now. Send in minutes. Save every time.",hlSize:80,name:"try-us"}
+];
+function renderFlyers(){document.getElementById("flyerGrid").innerHTML=FLYERS.map(function(f,i){return (
+  '<div class="flyer-wrap"><div class="flyer-scale">'+flyerShell(f)+'</div>'+
+  '<div class="fl-btns"><button onclick="printFlyer('+i+')">🖨 Print</button><button onclick="dlFlyer('+i+')">⬇ Download</button><button onclick="shareFlyer('+i+')">↗ Share</button></div></div>');}).join("");}
+function buildFlyer(i){var s=document.getElementById("flyerStage");s.innerHTML=flyerShell(FLYERS[i]);var el=s.querySelector(".flyer");el.style.transform="none";el.style.position="static";return el;}
+function flyerCanvas(i){return html2canvas(buildFlyer(i),{width:1080,height:1350,scale:2,backgroundColor:"#ffffff",useCORS:true});}
+function dlFlyer(i){toast("Rendering flyer…");flyerCanvas(i).then(function(c){var a=document.createElement("a");a.download="payexpress-flyer-"+FLYERS[i].name+".png";a.href=c.toDataURL("image/png");a.click();});}
+function shareFlyer(i){toast("Preparing…");flyerCanvas(i).then(function(c){c.toBlob(function(b){var file=new File([b],"payexpress-flyer-"+FLYERS[i].name+".png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"PayExpress"}).catch(function(){});}else{var a=document.createElement("a");a.download=file.name;a.href=c.toDataURL();a.click();}});});}
+function printFlyer(i){toast("Preparing print…");flyerCanvas(i).then(function(c){var data=c.toDataURL("image/png");var w=window.open("","_blank");if(!w){alert("Please allow pop-ups to print the flyer.");return;}w.document.write('<!doctype html><html><head><title>PayExpress flyer</title><style>@page{size:auto;margin:10mm}html,body{margin:0;padding:0;background:#fff}img{display:block;width:100%;max-width:180mm;margin:0 auto}</style></head><body><img src="'+data+'" onload="setTimeout(function(){window.focus();window.print();},200)"></body></html>');w.document.close();});}
+
+/* ---- YouTube video production packages ---- */
+var VIDEOS=[
+ {t:"We Beat Any Rate — Guaranteed",len:"0:30",hook:"“Still losing money every time you send cash home?”",
+  script:["(0-3s) Still losing money every time you send money home?","(3-10s) Banks and big apps pocket the difference on the exchange rate.","(10-20s) PayExpress gives you a market-beating rate — and if you find a better one, we’ll beat it. Guaranteed.","(20-30s) Zero fees. Money home in minutes. Download PayExpress today."],
+  shots:["Person frowning at a bank receipt","Split screen: ‘Them’ vs ‘PayExpress’ rate counter ticking higher","Phone showing PayExpress send screen + ‘Best-rate guarantee’ badge","Smiling family receiving a notification"],
+  os:["LOSING MONEY?","WE BEAT ANY RATE","Zero fees • Minutes • payexpress.org"],
+  desc:"Stop overpaying to send money home. PayExpress gives you a market-beating exchange rate with ZERO transfer fees — and our best-rate guarantee means if you find a better rate anywhere, we’ll beat it. Send to Nigeria and 20+ countries in minutes. Download today 👉 payexpress.org",
+  tags:"send money to nigeria, best exchange rate, money transfer app, remittance, naira rate, zero fees transfer, payexpress, send money home, diaspora",
+  thumb:"Bold text ‘WE BEAT ANY RATE’ on deep blue, a shocked face + a ₦ coin stack; gold guarantee badge."},
+ {t:"Send Money to Nigeria in 2 Minutes",len:"0:45",hook:"“Here’s how to send money home before your coffee gets cold.”",
+  script:["(0-4s) Sending money to Nigeria shouldn’t take days — or cost a fortune.","(4-15s) Step 1: Open PayExpress and enter the amount.","(15-28s) Step 2: Pick your recipient — bank, mobile wallet or cash pickup.","(28-40s) Step 3: Confirm. They get the best rate, you pay zero fees.","(40-45s) Done in minutes. Try PayExpress free."],
+  shots:["Coffee being poured (timer starts)","Screen-record: entering amount, live rate showing","Screen-record: selecting recipient + payout method","Confirmation checkmark animation","Recipient’s phone buzzing with ‘Money received’"],
+  os:["2-MINUTE TRANSFER","Best rate • Zero fees","Step 1 / 2 / 3"],
+  desc:"A 2-minute walkthrough of sending money to Nigeria with PayExpress — enter the amount, pick bank/wallet/cash pickup, confirm. Best-rate guaranteed, zero fees, delivered in minutes. Download 👉 payexpress.org",
+  tags:"how to send money to nigeria, money transfer tutorial, payexpress, send money app, mobile wallet nigeria, cash pickup, best naira rate, remittance",
+  thumb:"Phone mockup mid-transfer + big ‘2 MIN’ stamp; ‘ZERO FEES’ tag."},
+ {t:"Stop Overpaying to Send Money Home",len:"0:30",hook:"“You’re probably overpaying right now. Here’s proof.”",
+  script:["(0-5s) If you send money home, you’re probably overpaying.","(5-15s) Hidden fees and poor rates quietly eat your money.","(15-25s) PayExpress shows you the real rate — and beats any rate you find.","(25-30s) Switch today and keep more in the family."],
+  shots:["Money slowly draining from a wallet graphic","Magnifying glass over ‘hidden fee’ fine print","PayExpress rate vs competitor side by side","Family smiling, money ‘topped up’ animation"],
+  os:["HIDDEN FEES = LOST MONEY","SEE THE REAL RATE","We beat any rate"],
+  desc:"Hidden fees and weak exchange rates cost you every transfer. PayExpress is transparent — real rate, zero fees, and a best-rate guarantee. Keep more in the family. 👉 payexpress.org",
+  tags:"hidden fees money transfer, overpaying remittance, best exchange rate, send money home, payexpress, naira rate, diaspora money",
+  thumb:"Wallet with coins leaking + red arrow; ‘STOP OVERPAYING’ in bold."},
+ {t:"PayExpress vs The Banks: Rate Showdown",len:"0:40",hook:"“Bank rate vs PayExpress rate — let’s settle this.”",
+  script:["(0-5s) Bank versus PayExpress — same $500 sent home.","(5-18s) The bank: lower rate, extra fees, 2-3 days.","(18-30s) PayExpress: best-rate guarantee, zero fees, minutes.","(30-40s) Same money in. More money out. You do the math."],
+  shots:["Boxing-match title card: BANK vs PAYEXPRESS","Bank side: slow clock, fee stack, smaller payout number","PayExpress side: fast clock, ‘0 fees’, bigger payout number","Winner banner over PayExpress"],
+  os:["$500 SENT HOME","BANK vs PAYEXPRESS","More naira, zero fees"],
+  desc:"We sent $500 to Nigeria with a bank and with PayExpress. Same money in — but PayExpress delivers more, with zero fees and a best-rate guarantee, in minutes instead of days. 👉 payexpress.org",
+  tags:"bank vs app money transfer, best rate nigeria, remittance comparison, payexpress, send money home, zero fees, naira exchange rate",
+  thumb:"Split ‘VS’ graphic, bank logo-style box vs PayExpress; big ‘$500 →’ numbers."},
+ {t:"Zero Fees, Best Rate — Here’s How",len:"0:35",hook:"“How can we charge zero fees AND beat every rate?”",
+  script:["(0-5s) Zero fees and a best-rate guarantee — how?","(5-18s) We built PayExpress lean and partnered with a licensed credit union.","(18-28s) That means better rates passed straight to you.","(28-35s) No fees. No games. Just more money home."],
+  shots:["Question mark over a ‘$0 FEE’ badge","Simple animation: ‘lean tech + HHFCU partner → better rate’","Arrow pointing savings to a family","App screen with best-rate badge"],
+  os:["HOW? $0 FEES","Licensed + lean = better rate","payexpress.org"],
+  desc:"PayExpress charges zero transfer fees and guarantees to beat any rate. How? Lean technology plus a licensed credit-union partner (Heritage Hub FCU) means better rates passed straight to you. 👉 payexpress.org",
+  tags:"zero fee money transfer, best rate guarantee, how payexpress works, remittance, send money to nigeria, hhfcu, diaspora",
+  thumb:"Big ‘$0’ with a gold check; subtitle ‘and we BEAT any rate’."},
+ {t:"Why I Switched to PayExpress",len:"0:40",hook:"“I was done losing money on every transfer.”",
+  script:["(0-6s) I used to dread sending money home — bad rates, surprise fees.","(6-18s) A friend told me about PayExpress and the best-rate guarantee.","(18-30s) First transfer: better rate, zero fees, landed in minutes.","(30-40s) Now it’s the only app I use. Try it."],
+  shots:["Creator talking to camera, relatable tone","Phone showing an old transfer with high fees","Creator reacting to PayExpress rate (‘wait, that’s it?’)","Recipient voice-note: ‘it’s here already!’"],
+  os:["I SWITCHED","Better rate. Zero fees.","@payexpress"],
+  desc:"A real-talk testimonial on switching to PayExpress for sending money home — better exchange rate, zero fees, and a best-rate guarantee. Delivered in minutes. 👉 payexpress.org  (UGC-style; swap in a real customer where possible.)",
+  tags:"payexpress review, money transfer testimonial, send money to nigeria, best rate, remittance app, diaspora story",
+  thumb:"Creator face mid-reaction + text ‘WHY I SWITCHED’; phone in hand."},
+ {t:"Send Money Home While You Sleep",len:"0:30",hook:"“Set it. Send it. Done — even at 2am.”",
+  script:["(0-5s) Need to send money home but the bank’s closed?","(5-15s) PayExpress runs 24/7 — send any time, from anywhere.","(15-25s) Best rate, zero fees, confirmed in minutes.","(25-30s) Your family won’t wait. Neither should you."],
+  shots:["Clock showing 2:00am","Person sending from bed on their phone","‘Sent ✓’ + recipient notification across the world (map arc)","Sunrise over Lagos, phone lighting up"],
+  os:["24/7 TRANSFERS","Any time. Any where.","Best rate • Zero fees"],
+  desc:"Banks close. PayExpress doesn’t. Send money home 24/7 at the best rate with zero fees, confirmed in minutes. 👉 payexpress.org",
+  tags:"24/7 money transfer, send money anytime, payexpress, remittance, send money to nigeria, best rate, instant transfer",
+  thumb:"Night sky + phone glow, ‘2AM? NO PROBLEM’; globe with a money arc."},
+ {t:"How Much More Your Family Gets",len:"0:35",hook:"“The same $300 — but look how much more lands at home.”",
+  script:["(0-5s) Same $300 sent home. Watch the difference.","(5-18s) Other app: lower rate + fees = less naira delivered.","(18-28s) PayExpress: best-rate guarantee + zero fees = more naira.","(28-35s) It adds up fast. That’s groceries, school fees, more."],
+  shots:["$300 bill placed down","Counter A (other app) ticks to a lower ₦ number","Counter B (PayExpress) ticks higher, highlighted gold","Grocery bag / school uniform icons filling up"],
+  os:["SAME $300","MORE NAIRA HOME","Zero fees • Best rate"],
+  desc:"See exactly how much more your family receives when you send with PayExpress — best-rate guarantee and zero fees mean more naira delivered on the same dollars. 👉 payexpress.org",
+  tags:"exchange rate comparison, more naira per dollar, send money to nigeria, best rate, zero fees, remittance math, payexpress",
+  thumb:"Two big ₦ numbers side by side, PayExpress one circled gold; ‘SAME $300’."},
+ {t:"Bank, Wallet or Cash — You Choose",len:"0:30",hook:"“However your family wants it, we deliver it.”",
+  script:["(0-5s) Not everyone wants money the same way.","(5-20s) PayExpress delivers to bank accounts, mobile wallets, or cash pickup.","(20-27s) Same best rate, zero fees, every method.","(27-30s) You choose. We deliver."],
+  shots:["Three icons appear: bank, wallet, cash","Quick cuts of each payout happening","Best-rate badge stays on screen across all three","Family member collecting cash, smiling"],
+  os:["BANK • WALLET • CASH","Your choice","Best rate, every way"],
+  desc:"Send to a bank account, mobile wallet, or cash pickup — PayExpress delivers however your family prefers, all at the best rate with zero fees. 👉 payexpress.org",
+  tags:"cash pickup nigeria, mobile wallet transfer, bank deposit remittance, payexpress, send money home, best rate",
+  thumb:"Three big icons (bank/wallet/cash) + ‘YOU CHOOSE’; gold rate badge."},
+ {t:"Is PayExpress Safe? Licensed & Protected",len:"0:45",hook:"“Before you send a dollar — is it actually safe?”",
+  script:["(0-6s) New app, your hard-earned money — is it safe?","(6-20s) PayExpress is backed by Heritage Hub Federal Credit Union, an NCUA-insured institution.","(20-32s) Your transfers run through a licensed, compliant money-movement partner.","(32-45s) Bank-grade security, real support, best-rate guarantee. Send with confidence."],
+  shots:["Padlock + shield animation","HHFCU / NCUA badge lower-third","Encryption / secure-check graphics","Calm user completing a transfer confidently"],
+  os:["IS IT SAFE?","Backed by HHFCU (NCUA)","Licensed • Secure • Trusted"],
+  desc:"Yes — PayExpress is built on trust. Backed by Heritage Hub Federal Credit Union (NCUA-insured) and a licensed money-movement framework, with bank-grade security and real support. Plus a best-rate guarantee and zero fees. 👉 payexpress.org",
+  tags:"is payexpress safe, secure money transfer, licensed remittance, hhfcu, ncua, send money to nigeria safely, best rate",
+  thumb:"Shield + padlock, ‘IS IT SAFE?’; HHFCU/NCUA trust badge."},
+ {t:"First Transfer Walkthrough (Step by Step)",len:"1:00",hook:"“Your first transfer, start to finish — follow along.”",
+  script:["(0-6s) First time sending with PayExpress? I’ll walk you through it.","(6-20s) Download the app and create your account in under a minute.","(20-34s) Add your recipient and choose bank, wallet or cash pickup.","(34-48s) Enter the amount — see the best rate live, zero fees.","(48-60s) Confirm and pay. Money’s on its way in minutes. That’s it!"],
+  shots:["App Store / Play Store download","Screen-record: quick sign-up","Screen-record: add recipient + payout method","Screen-record: amount + live rate + ‘$0 fee’","Confirmation + ‘money sent’ celebration"],
+  os:["FIRST TRANSFER","Sign up • Add • Send","Best rate • Zero fees"],
+  desc:"A complete first-transfer walkthrough with PayExpress: download, sign up, add a recipient, choose bank/wallet/cash pickup, see the best rate live with zero fees, and send — all in minutes. 👉 payexpress.org",
+  tags:"payexpress tutorial, first money transfer, how to use payexpress, send money to nigeria, beginner guide, remittance app",
+  thumb:"Numbered 1-2-3-4 phone screens + ‘START HERE’; friendly arrow."},
+ {t:"Diaspora, This One’s For You",len:"0:40",hook:"“To everyone sending love home — we see you.”",
+  script:["(0-8s) You work hard, far from home, so your family can thrive.","(8-20s) Every transfer is more than money — it’s school fees, medicine, love.","(20-32s) PayExpress helps more of it get there: best rate, zero fees.","(32-40s) Because they deserve every naira. Send with PayExpress."],
+  shots:["Montage: diaspora workers in different cities","Family back home: child in school, parent at market","Warm phone moment — ‘money received’, happy reaction","Logo + best-rate badge"],
+  os:["FOR THE DIASPORA","More love gets home","Best rate • Zero fees"],
+  desc:"A heartfelt tribute to the diaspora who send love home. PayExpress helps more of it arrive — best-rate guarantee, zero fees, in minutes. Because they deserve every naira. 👉 payexpress.org",
+  tags:"diaspora, send money home, nigerians abroad, remittance, family support, payexpress, best rate",
+  thumb:"Warm family photo split with a worker abroad; ‘FOR THE DIASPORA’."},
+ {t:"Beat Your Rate in 30 Seconds",len:"0:30",hook:"“Screenshot your current rate. We’ll beat it. Watch.”",
+  script:["(0-5s) Whatever rate you’re getting right now — screenshot it.","(5-15s) Open PayExpress and compare.","(15-25s) Our best-rate guarantee means we beat it, with zero fees.","(25-30s) Challenge accepted? Download and try."],
+  shots:["Hand screenshotting a competitor rate","Side-by-side comparison in PayExpress","Gold ‘WE BEAT IT’ stamp slams down","CTA: download arrows"],
+  os:["SCREENSHOT YOUR RATE","WE’LL BEAT IT","Challenge accepted?"],
+  desc:"Think you’ve got a good rate? Screenshot it and compare with PayExpress — our best-rate guarantee means we beat it, with zero fees. Take the challenge. 👉 payexpress.org",
+  tags:"best rate challenge, beat my rate, money transfer, send money to nigeria, payexpress, zero fees, naira rate",
+  thumb:"Phone screenshot vs PayExpress + gold ‘WE BEAT IT’ stamp."},
+ {t:"Send to Ghana, Kenya & 20+ Countries",len:"0:35",hook:"“It’s not just Nigeria — we’ve got the whole map.”",
+  script:["(0-5s) Think PayExpress is just for Nigeria? Think again.","(5-20s) Send to Ghana, Kenya, the UK, India, and 20+ countries.","(20-28s) Same best-rate guarantee. Same zero fees. Everywhere.","(28-35s) Wherever home is — we’ve got you."],
+  shots:["World map lighting up country by country","Flags flipping: 🇳🇬 🇬🇭 🇰🇪 🇬🇧 🇮🇳 …","Best-rate badge over the map","App country picker scrolling"],
+  os:["20+ COUNTRIES","One app. Best rate.","Wherever home is"],
+  desc:"PayExpress isn’t just Nigeria — send to Ghana, Kenya, the UK, India and 20+ countries, all with the best-rate guarantee and zero fees. 👉 payexpress.org",
+  tags:"send money to ghana, send money to kenya, international money transfer, 20 countries, payexpress, best rate, remittance",
+  thumb:"Glowing world map with flags + ‘20+ COUNTRIES’; gold rate badge."},
+ {t:"The Hidden Fees Other Apps Hide",len:"0:40",hook:"“‘No fees’… so why did they get less? Let’s expose it.”",
+  script:["(0-6s) ‘Free transfer!’ — then your family gets less. Why?","(6-20s) The fee is hidden in a bad exchange rate.","(20-30s) PayExpress shows the real rate and beats any rate — zero hidden fees.","(30-40s) Transparency wins. Send smarter."],
+  shots:["‘FREE’ banner that peels off to reveal a bad rate underneath","Magnifier on the exchange-rate markup","PayExpress transparent rate screen","Checkmark: ‘what you see is what they get’"],
+  os:["‘FREE’… REALLY?","THE FEE IS THE RATE","No hidden markups"],
+  desc:"Many apps say ‘no fees’ but hide the cost in a poor exchange rate. PayExpress is transparent — real rate, best-rate guarantee, zero hidden fees. 👉 payexpress.org",
+  tags:"hidden fees exposed, exchange rate markup, no fee transfer truth, send money to nigeria, payexpress, best rate",
+  thumb:"‘FREE’ sticker peeling to reveal ‘BAD RATE’; magnifying glass."},
+ {t:"Payday = Send Day",len:"0:25",hook:"“Payday hits different when home is counting on you.”",
+  script:["(0-5s) Payday? Time to take care of home.","(5-15s) Send in minutes with PayExpress — best rate, zero fees.","(15-22s) Set it once, repeat every payday.","(22-25s) Home, handled."],
+  shots:["Paycheck / deposit notification","Quick PayExpress send","Calendar with recurring ‘send’ marked","Family happy notification"],
+  os:["PAYDAY = SEND DAY","Minutes. Best rate.","Home, handled."],
+  desc:"Make payday send day. PayExpress sends money home in minutes at the best rate with zero fees — easy to repeat every cycle. 👉 payexpress.org",
+  tags:"payday, send money home, recurring transfer, payexpress, best rate, remittance, diaspora",
+  thumb:"Calendar ‘PAYDAY’ circled + phone sending; ‘= SEND DAY’."},
+ {t:"From Houston to Lagos: A Transfer Story",len:"0:50",hook:"“9,000 km, one tap, two minutes.”",
+  script:["(0-8s) Tunde’s in Houston. His mum’s in Lagos. Rent’s due Friday.","(8-22s) Old way: bank queue, high fees, three-day wait, stress.","(22-36s) New way: PayExpress — best rate, zero fees, sent in two minutes.","(36-50s) Mum gets it before dinner. That’s the PayExpress difference."],
+  shots:["Map arc Houston → Lagos","Tunde stressed at a bank (flashback tone)","Tunde relaxed, sending on PayExpress","Mum in Lagos receiving + happy phone call"],
+  os:["HOUSTON → LAGOS","2 minutes, not 3 days","Best rate • Zero fees"],
+  desc:"A short story: Tunde sends rent from Houston to his mum in Lagos. The old way meant queues, fees and a 3-day wait. With PayExpress — best rate, zero fees, delivered in minutes. 👉 payexpress.org",
+  tags:"money transfer story, houston to lagos, send money to nigeria, payexpress, best rate, remittance, diaspora",
+  thumb:"Map arc Houston→Lagos with a phone in the middle; ‘2 MIN NOT 3 DAYS’."},
+ {t:"Download PayExpress in 60 Seconds",len:"0:30",hook:"“One minute now saves you money forever.”",
+  script:["(0-5s) Ready to stop overpaying? Let’s get you set up.","(5-15s) Search ‘PayExpress’, download, open.","(15-25s) Create your account — takes under a minute.","(25-30s) You’re ready to send at the best rate, zero fees."],
+  shots:["App store search ‘PayExpress’","Install progress bar","Quick sign-up screen","‘You’re ready!’ + best-rate badge"],
+  os:["GET THE APP","Under 60 seconds","Best rate • Zero fees"],
+  desc:"Get PayExpress in under a minute — search, download, sign up, and you’re ready to send money home at the best rate with zero fees. 👉 payexpress.org",
+  tags:"download payexpress, get the app, money transfer app, send money to nigeria, best rate, install",
+  thumb:"Phone with install button + ‘60 SECONDS’; app icon highlighted."},
+ {t:"Why Our Rate Is Always the Best",len:"0:45",hook:"“Here’s the secret behind our best-rate guarantee.”",
+  script:["(0-6s) How can PayExpress guarantee to beat any rate?","(6-20s) We keep costs lean and partner with a licensed credit union.","(20-32s) No bloated middlemen, no hidden markups — savings go to you.","(32-45s) That’s why we can beat any rate and still charge zero fees."],
+  shots:["Simple flow diagram: ‘you → PayExpress → home’ (short chain)","‘Other apps’ long chain with fees falling off at each step","Savings arrow pointing to the sender","Best-rate guarantee seal"],
+  os:["THE SECRET","Fewer middlemen = better rate","Best-rate guarantee"],
+  desc:"The reason behind our best-rate guarantee: lean operations and a licensed credit-union partnership mean fewer middlemen, no hidden markups, and better rates passed to you — with zero fees. 👉 payexpress.org",
+  tags:"best rate explained, how payexpress works, no middlemen, remittance, send money to nigeria, zero fees, hhfcu",
+  thumb:"Short arrow chain vs long fee-heavy chain; ‘WHY WE’RE CHEAPER’."},
+ {t:"Tag Someone Who Sends Money Home",len:"0:20",hook:"“Know someone still overpaying? Tag them.”",
+  script:["(0-4s) We all know someone who sends money home.","(4-12s) And someone who’s still overpaying to do it.","(12-18s) Do them a favor — tag them. PayExpress beats any rate, zero fees.","(18-20s) Share the savings."],
+  shots:["Fast relatable montage of people sending money","‘TAG THEM 👇’ animated prompt","PayExpress best-rate badge","Share / comment icons bouncing"],
+  os:["TAG SOMEONE 👇","Who’s still overpaying?","We beat any rate"],
+  desc:"Tag someone who sends money home and is still overpaying — PayExpress beats any rate with zero fees. Share the savings! 👉 payexpress.org  (Great as a YouTube Short / Reel.)",
+  tags:"tag a friend, send money home, shorts, remittance, payexpress, best rate, diaspora, viral",
+  thumb:"Big ‘TAG SOMEONE 👇’ on blue + two phone bubbles; gold badge."}
+];
+function renderVideos(){document.getElementById("videoList").innerHTML=VIDEOS.map(function(v,i){
+  var n=i+1;
+  return '<details class="vid"><summary><span class="vnum">'+n+'</span>'+
+    '<span class="vtt"><b>'+v.t+'</b><small>YouTube · '+v.len+' · '+v.hook+'</small></span>'+
+    '<span class="vopen">▾</span></summary>'+
+    '<div class="vbody">'+
+      '<h5>Hook (first 3 seconds)</h5><p class="lead">'+v.hook+'</p>'+
+      '<h5>Script / Voiceover</h5><ul>'+v.script.map(function(s){return '<li>'+s+'</li>';}).join("")+'</ul>'+
+      '<h5>Storyboard (shot list)</h5><ul>'+v.shots.map(function(s,k){return '<li>'+(k+1)+'. '+s+'</li>';}).join("")+'</ul>'+
+      '<h5>On-screen text</h5><ul>'+v.os.map(function(s){return '<li>“'+s+'”</li>';}).join("")+'</ul>'+
+      '<h5>YouTube description</h5><p>'+v.desc+'</p>'+
+      '<h5>Tags</h5><p class="tags"><code>'+v.tags+'</code></p>'+
+      '<h5>Thumbnail concept</h5><p>'+v.thumb+'</p>'+
+      '<div class="vact"><button class="pri" onclick="copyVid('+i+',\'full\')">📋 Copy full package</button>'+
+        '<button onclick="copyVid('+i+',\'script\')">Copy script</button>'+
+        '<button onclick="copyVid('+i+',\'desc\')">Copy description + tags</button></div>'+
+    '</div></details>';
+}).join("");}
+function copyVid(i,mode){var v=VIDEOS[i];var n=i+1;var txt="";
+  if(mode==="script"){txt="PayExpress — Video #"+n+": "+v.t+" ("+v.len+")\nHOOK: "+v.hook+"\n\nSCRIPT:\n"+v.script.join("\n");}
+  else if(mode==="desc"){txt=v.desc+"\n\nTAGS: "+v.tags;}
+  else{txt="PayExpress — YouTube Video #"+n+": "+v.t+" ("+v.len+")\n\nHOOK:\n"+v.hook+"\n\nSCRIPT / VOICEOVER:\n"+v.script.join("\n")+"\n\nSTORYBOARD:\n"+v.shots.map(function(s,k){return (k+1)+". "+s;}).join("\n")+"\n\nON-SCREEN TEXT:\n- "+v.os.join("\n- ")+"\n\nYOUTUBE DESCRIPTION:\n"+v.desc+"\n\nTAGS:\n"+v.tags+"\n\nTHUMBNAIL CONCEPT:\n"+v.thumb;}
+  var done=function(){toast(mode==="full"?"Full package copied":mode==="script"?"Script copied":"Description + tags copied");};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){fallbackCopy(txt);done();});}
+  else{fallbackCopy(txt);done();}
+}
+function fallbackCopy(t){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();}
+
+function boot(){ loadRates(); renderKpis(); renderTx(); renderRateEditor(); fillContact(); renderFlyers(); renderVideos(); }
 boot();
 </script>
 </body>
