@@ -1,0 +1,38 @@
+:root{
+  --blue-dark:#0b3b8c; --blue:#2b7de9; --blue-wash:#e7f0fd;
+  --ink:#0d1b2e; --body:#3c4a5e; --muted:#697788;
+  --ground:#e8f0fc; --card:#ffffff; --line:#dde7f5;
+  --disp:"Sora",system-ui,sans-serif; --sans:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --blue-dark:#5aa0f5; --blue:#3f8ef0; --blue-wash:#122a4d;
+  --ink:#eaf1fb; --body:#b6c6db; --muted:#8598b0;
+  --ground:#08152a; --card:#0f2440; --line:#1c355a; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --blue-dark:#5aa0f5; --blue:#3f8ef0; --blue-wash:#122a4d;
+  --ink:#eaf1fb; --body:#b6c6db; --muted:#8598b0;
+  --ground:#08152a; --card:#0f2440; --line:#1c355a; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--body);font-family:var(--sans);font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.top{background:linear-gradient(180deg,#0b3b8c,#2b7de9);color:#fff;padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top))}
+.top-in{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.top-in a{color:#fff;text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand{font-family:var(--disp);font-weight:700;font-size:1.16rem;color:#fff}
+.top svg{width:32px;height:32px}
+.wrap{max-width:820px;margin:0 auto;padding:26px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:30px 30px 34px;box-shadow:0 10px 30px rgba(11,59,140,.08)}
+h1{font-family:var(--disp);color:var(--ink);font-size:1.7rem;margin:0 0 4px;line-height:1.2}
+.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:.72rem;font-weight:700;color:var(--blue)}
+.updated{color:var(--muted);font-size:.84rem;margin:2px 0 18px}
+h2{font-family:var(--disp);color:var(--ink);font-size:1.08rem;margin:22px 0 6px}
+p,li{color:var(--body)}
+ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
+a{color:var(--blue)}
+b,strong{color:var(--ink)}
+.box{background:var(--blue-wash);border-left:3px solid var(--blue);border-radius:8px;padding:12px 16px;margin:14px 0}
+.ent{display:grid;grid-template-columns:120px 1fr;gap:3px 12px;font-size:.9rem;margin:8px 0 2px}
+.ent .k{color:var(--muted)}.ent .v{color:var(--ink);font-weight:600}
+.backlinks{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);font-size:.86rem;display:flex;gap:16px;flex-wrap:wrap}
+.foot{max-width:820px;margin:0 auto;padding:18px 20px 40px;color:var(--muted);font-size:.78rem;text-align:center}
