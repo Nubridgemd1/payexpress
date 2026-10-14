@@ -255,7 +255,6 @@ tbody tr:last-child td{border-bottom:0}
       <button role="tab" aria-selected="false" onclick="go('cards')">Cards</button>
       <button role="tab" aria-selected="false" onclick="go('recipients')">Recipients</button>
       <button role="tab" aria-selected="false" onclick="go('verify')">Verify</button>
-      <button role="tab" aria-selected="false" onclick="go('partners')">For partners</button>
     </div>
     <span class="spacer"></span>
     <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">
@@ -474,56 +473,6 @@ tbody tr:last-child td{border-bottom:0}
   </section>
 
   <!-- PARTNERS / IMTO -->
-  <section class="view" id="view-partners">
-    <div class="eyebrow">For IMTOs, banks &amp; fintechs in Nigeria</div>
-    <h1 style="font-size:1.6rem;margin:4px 0 6px">Plug PayExpress into your payout rails</h1>
-    <p class="lead" style="margin-bottom:20px">PayExpress collects the sender's USD in a US receivable account, screens it, and pushes the payment instruction to your platform in real time. You credit the beneficiary once the corresponding USD has settled in that receivable account - so every payout is backed by funds you can see, with no pre-funding risk. Connect with a single REST API and webhook.</p>
-
-    <div class="feat">
-      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><h4>One REST API</h4><p>Create payouts, check status, and reconcile with a documented JSON API and sandbox keys.</p></div>
-      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4"/><path d="M21 6H7a4 4 0 00-4 4v1"/><path d="M7 22l-4-4 4-4"/><path d="M3 18h14a4 4 0 004-4v-1"/></svg></div><h4>Webhooks</h4><p>Real-time delivery, failure, and settlement events pushed to your endpoint.</p></div>
-      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h4>Compliance at source</h4><p>US-side KYC/AML/OFAC done before funds reach you - traceable, pre-screened flows.</p></div>
-      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg></div><h4>FX &amp; settlement</h4><p>Agreed rate and margin per transfer; USD settlement to your nostro on a set cycle.</p></div>
-      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M4 10v9h16v-9"/></svg></div><h4>Any payout method</h4><p>Bank (NUBAN), card, mobile wallet, or cash - route to whatever you support.</p></div>
-      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h4>CBN-aligned</h4><p>Built to operate within the CBN IMTO / authorised-dealer framework.</p></div>
-    </div>
-
-    <div class="section-h" style="margin-top:26px"><div><div class="eyebrow">Settlement model</div><h3 style="font-size:1.1rem;margin-top:3px">Real-time instructions, settle-then-credit</h3></div></div>
-    <div class="card pad">
-      <div class="cycle">
-        <div class="node"><div class="num">1</div><h4>Sender pays USD</h4><p>Card charged in the US</p></div>
-        <div class="node"><div class="num">2</div><h4>USD settles</h4><p>Into the US receivable account</p></div>
-        <div class="node"><div class="num">3</div><h4>Instruction pushed</h4><p>Real-time webhook to your IMTO</p></div>
-        <div class="node"><div class="num">4</div><h4>Credit beneficiary</h4><p>Pay out NGN against settled funds</p></div>
-        <div class="node"><div class="num">5</div><h4>Reconcile</h4><p>USD remitted to your nostro on cycle</p></div>
-      </div>
-      <div class="callout" style="margin-top:14px">Instructions arrive in <b>real time</b>, each carrying a <b>settlement confirmation</b>. Your platform credits the beneficiary only once the matching USD has <b>settled in the US receivable account</b> - no pre-funding, no payout risk.</div>
-    </div>
-
-    <div class="section-h" style="margin-top:26px"><h3 style="font-size:1.1rem">The real-time instruction your platform receives</h3></div>
-    <div class="code"><span class="c">// Webhook (real time) -&gt; POST https://your-imto.ng/webhooks/payexpress</span><br>
-{<br>
-&nbsp;&nbsp;<span class="k">"event"</span>: <span class="s">"payout.instruction"</span>,<br>
-&nbsp;&nbsp;<span class="k">"reference"</span>: <span class="s">"PX-8842013"</span>,<br>
-&nbsp;&nbsp;<span class="k">"settlement_status"</span>: <span class="s">"settled"</span>,<span class="c"> // USD confirmed in US receivable a/c</span><br>
-&nbsp;&nbsp;<span class="k">"usd_amount"</span>: <span class="s">500.00</span>,<br>
-&nbsp;&nbsp;<span class="k">"amount_ngn"</span>: <span class="s">792500</span>,<br>
-&nbsp;&nbsp;<span class="k">"method"</span>: <span class="s">"bank_account"</span>,<br>
-&nbsp;&nbsp;<span class="k">"recipient"</span>: { <span class="k">"name"</span>: <span class="s">"Test Recipient One"</span>, <span class="k">"bank_code"</span>: <span class="s">"058"</span>, <span class="k">"nuban"</span>: <span class="s">"0123454471"</span> }<br>
-}<br>
-<span class="c">// You credit the beneficiary, then acknowledge:</span><br>
-<span class="c">// POST https://api.payexpress.com/v1/payouts/PX-8842013/ack  { "status": "paid" }</span></div>
-
-    <div class="section-h" style="margin-top:26px"><h3 style="font-size:1.1rem">Go live in four steps</h3></div>
-    <div class="steps">
-      <div class="st"><h4>Connect</h4><p>Get sandbox keys, map your bank/wallet codes.</p></div>
-      <div class="st"><h4>Integrate</h4><p>Wire the payout API + webhook endpoint.</p></div>
-      <div class="st"><h4>Certify</h4><p>Test flows, reconciliation, and settlement.</p></div>
-      <div class="st"><h4>Launch</h4><p>Flip to production and start receiving volume.</p></div>
-    </div>
-    <div class="callout" style="margin-top:18px">Already running an IMTO or switching platform? PayExpress drops in alongside your existing rails - start with a single corridor and scale.</div>
-  </section>
-
   <!-- ADMIN -->
   <section class="view" id="view-admin">
     <!-- gate -->
@@ -636,7 +585,6 @@ tbody tr:last-child td{border-bottom:0}
   <button aria-selected="false" onclick="go('cards')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Cards</span></button>
   <button aria-selected="false" onclick="go('recipients')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg><span>People</span></button>
   <button aria-selected="false" onclick="go('verify')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Verify</span></button>
-  <button aria-selected="false" onclick="go('partners')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg><span>Partners</span></button>
 </nav>
 <div class="bfc">Powered by <b>BizFormCorp</b> and <b>HHFCU</b></div>
 <div class="toast" id="toast"></div>

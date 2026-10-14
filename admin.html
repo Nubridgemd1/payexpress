@@ -141,6 +141,31 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
 .vid .vact button{border:1px solid var(--line2);background:var(--card);color:var(--blue-dark);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:.8rem;font-weight:700;min-height:38px}
 .vid .vact button.pri{background:var(--blue);color:#fff;border-color:var(--blue)}
 .kit-note{font-size:.82rem;color:var(--muted);margin:0 0 16px}
+
+/* ---- For Partners (IMTO integration) ---- */
+.lead{color:var(--body);font-size:1rem;max-width:62ch}
+.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:760px){.feat{grid-template-columns:1fr}}
+.f{border:1px solid var(--line);border-radius:var(--r-sm);padding:15px 16px;background:var(--card)}
+.f .fi{width:38px;height:38px;border-radius:10px;background:var(--blue-wash);color:var(--blue-dark);display:grid;place-items:center;margin-bottom:11px}
+.f .fi svg{width:19px;height:19px}
+.f h4{font-size:1rem;margin-bottom:4px}.f p{font-size:.88rem;margin:0}
+.cycle{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative;margin:6px 0}
+@media(max-width:760px){.cycle{grid-template-columns:1fr}}
+.node{text-align:center;padding:0 8px;position:relative}
+.node .num{width:42px;height:42px;border-radius:50%;margin:0 auto 9px;background:var(--card);border:2px solid var(--blue);color:var(--blue-dark);display:grid;place-items:center;font-family:var(--disp);font-weight:700;position:relative;z-index:2}
+.node h4{font-size:.88rem;margin-bottom:2px}.node p{font-size:.78rem;color:var(--muted);margin:0}
+.cycle .node:not(:last-child)::after{content:"";position:absolute;top:21px;left:calc(50% + 28px);right:calc(-50% + 28px);height:2px;background:linear-gradient(90deg,var(--blue),var(--blue-light));z-index:1}
+@media(max-width:760px){.cycle .node{display:grid;grid-template-columns:42px 1fr;gap:12px;text-align:left;padding:0 0 18px}.node .num{margin:0}.cycle .node:not(:last-child)::after{top:42px;bottom:0;left:20px;right:auto;width:2px;height:auto}.node h4,.node p{grid-column:2}}
+.code{background:#0b1b33;border:1px solid #1c355a;border-radius:12px;padding:16px 18px;overflow-x:auto;color:#cfe0f7;font-family:"SFMono-Regular",Consolas,monospace;font-size:.82rem;line-height:1.65}
+.code .k{color:#7bb8f7}.code .s{color:#8fdcae}.code .c{color:#6b83a5}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;counter-reset:st}
+@media(max-width:760px){.steps{grid-template-columns:1fr 1fr}}
+@media(max-width:460px){.steps{grid-template-columns:1fr}}
+.st{counter-increment:st;position:relative;padding-left:44px;padding-top:2px}
+.st::before{content:counter(st);position:absolute;left:0;top:0;width:32px;height:32px;border-radius:9px;background:var(--blue);color:#fff;font-family:var(--disp);font-weight:700;display:grid;place-items:center}
+.st h4{font-size:.95rem;margin-bottom:3px}.st p{font-size:.84rem;margin:0}
+.callout{background:var(--blue-wash);border:1px solid color-mix(in srgb,var(--blue) 26%,transparent);border-radius:var(--r-sm);padding:13px 15px;font-size:.9rem;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -176,6 +201,7 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
     <button role="tab" aria-selected="false" onclick="go('rates',this)">Rates &amp; Fees</button>
     <button role="tab" aria-selected="false" onclick="go('contact',this)">Contact</button>
     <button role="tab" aria-selected="false" onclick="go('marketing',this)">Marketing</button>
+    <button role="tab" aria-selected="false" onclick="go('partners',this)">For Partners</button>
     <button role="tab" aria-selected="false" onclick="go('login',this)">Login</button>
   </div>
 </div>
@@ -273,6 +299,56 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
       <p class="kit-note">20 full YouTube production packages — hook, script, storyboard, on-screen text, description, tags and thumbnail concept. Copy into CapCut / Canva / Premiere and record. “Copy full package” grabs everything.</p>
       <div id="videoList"></div>
     </div>
+  </section>
+
+  <!-- FOR PARTNERS (IMTO integration) -->
+  <section class="view" id="view-partners">
+    <div class="section-h"><div><div class="eyebrow">For IMTOs, banks &amp; fintechs in Nigeria</div><h1 class="pg">For Partners</h1></div></div>
+    <p class="lead" style="margin-bottom:20px">PayExpress collects the sender's USD in a US receivable account, screens it, and pushes the payment instruction to your platform in real time. You credit the beneficiary once the corresponding USD has settled in that receivable account — so every payout is backed by funds you can see, with no pre‑funding risk. Connect with a single REST API and webhook.</p>
+
+    <div class="feat">
+      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><h4>One REST API</h4><p>Create payouts, check status, and reconcile with a documented JSON API and sandbox keys.</p></div>
+      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4"/><path d="M21 6H7a4 4 0 00-4 4v1"/><path d="M7 22l-4-4 4-4"/><path d="M3 18h14a4 4 0 004-4v-1"/></svg></div><h4>Webhooks</h4><p>Real‑time delivery, failure, and settlement events pushed to your endpoint.</p></div>
+      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h4>Compliance at source</h4><p>US‑side KYC/AML/OFAC done before funds reach you — traceable, pre‑screened flows.</p></div>
+      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg></div><h4>FX &amp; settlement</h4><p>Agreed rate and margin per transfer; USD settlement to your nostro on a set cycle.</p></div>
+      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M4 10v9h16v-9"/></svg></div><h4>Any payout method</h4><p>Bank (NUBAN), card, mobile wallet, or cash — route to whatever you support.</p></div>
+      <div class="f"><div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h4>CBN‑aligned</h4><p>Built to operate within the CBN IMTO / authorised‑dealer framework.</p></div>
+    </div>
+
+    <div class="section-h" style="margin-top:26px"><div><div class="eyebrow">Settlement model</div><h3 style="font-size:1.1rem;margin-top:3px">Real‑time instructions, settle‑then‑credit</h3></div></div>
+    <div class="card pad">
+      <div class="cycle">
+        <div class="node"><div class="num">1</div><h4>Sender pays USD</h4><p>Card charged in the US</p></div>
+        <div class="node"><div class="num">2</div><h4>USD settles</h4><p>Into the US receivable account</p></div>
+        <div class="node"><div class="num">3</div><h4>Instruction pushed</h4><p>Real‑time webhook to your IMTO</p></div>
+        <div class="node"><div class="num">4</div><h4>Credit beneficiary</h4><p>Pay out NGN against settled funds</p></div>
+        <div class="node"><div class="num">5</div><h4>Reconcile</h4><p>USD remitted to your nostro on cycle</p></div>
+      </div>
+      <div class="callout" style="margin-top:14px">Instructions arrive in <b>real time</b>, each carrying a <b>settlement confirmation</b>. Your platform credits the beneficiary only once the matching USD has <b>settled in the US receivable account</b> — no pre‑funding, no payout risk.</div>
+    </div>
+
+    <div class="section-h" style="margin-top:26px"><h3 style="font-size:1.1rem">The real‑time instruction your platform receives</h3></div>
+    <div class="code"><span class="c">// Webhook (real time) -&gt; POST https://your-imto.ng/webhooks/payexpress</span><br>
+{<br>
+&nbsp;&nbsp;<span class="k">"event"</span>: <span class="s">"payout.instruction"</span>,<br>
+&nbsp;&nbsp;<span class="k">"reference"</span>: <span class="s">"PX-8842013"</span>,<br>
+&nbsp;&nbsp;<span class="k">"settlement_status"</span>: <span class="s">"settled"</span>,<span class="c"> // USD confirmed in US receivable a/c</span><br>
+&nbsp;&nbsp;<span class="k">"usd_amount"</span>: <span class="s">500.00</span>,<br>
+&nbsp;&nbsp;<span class="k">"amount_ngn"</span>: <span class="s">792500</span>,<br>
+&nbsp;&nbsp;<span class="k">"method"</span>: <span class="s">"bank_account"</span>,<br>
+&nbsp;&nbsp;<span class="k">"recipient"</span>: { <span class="k">"name"</span>: <span class="s">"Jane Doe"</span>, <span class="k">"bank_code"</span>: <span class="s">"058"</span>, <span class="k">"nuban"</span>: <span class="s">"0123454471"</span> }<br>
+}<br>
+<span class="c">// You credit the beneficiary, then acknowledge:</span><br>
+<span class="c">// POST https://api.payexpress.com/v1/payouts/PX-8842013/ack  { "status": "paid" }</span></div>
+
+    <div class="section-h" style="margin-top:26px"><h3 style="font-size:1.1rem">Go live in four steps</h3></div>
+    <div class="steps">
+      <div class="st"><h4>Connect</h4><p>Get sandbox keys, map your bank/wallet codes.</p></div>
+      <div class="st"><h4>Integrate</h4><p>Wire the payout API + webhook endpoint.</p></div>
+      <div class="st"><h4>Certify</h4><p>Test flows, reconciliation, and settlement.</p></div>
+      <div class="st"><h4>Launch</h4><p>Flip to production and start receiving volume.</p></div>
+    </div>
+    <div class="callout" style="margin-top:18px">Already running an IMTO or switching platform? PayExpress drops in alongside your existing rails — start with a single corridor and scale.</div>
   </section>
 
   <!-- LOGIN -->
