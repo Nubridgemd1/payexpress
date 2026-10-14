@@ -1,5 +1,5 @@
 /* PayExpress service worker — app-shell cache for offline + installability. */
-const CACHE = 'payexpress-v1';
+const CACHE = 'payexpress-v2';
 const SHELL = [
   './',
   './index.html',
@@ -28,9 +28,22 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Navigations: serve the cached app shell, fall back to network (SPA offline support).
+  // Navigations:
   if (req.mode === 'navigate') {
-    e.respondWith(caches.match('./index.html').then((r) => r || fetch(req)));
+    // Admin console is a separate page — never serve the customer app shell for it.
+    if (url.pathname.indexOf('admin') !== -1) {
+      e.respondWith(fetch(req).catch(() => caches.match(req)));
+      return;
+    }
+    // Customer app: network-first so content updates reach users immediately;
+    // keep the cached shell fresh and fall back to it only when offline.
+    e.respondWith(
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put('./index.html', copy));
+        return res;
+      }).catch(() => caches.match('./index.html'))
+    );
     return;
   }
 
