@@ -286,7 +286,7 @@ tbody tr:last-child td{border-bottom:0}
 
       <div class="card calc">
         <div class="fx-row">
-          <div style="flex:1"><div class="lbl">You send</div><input id="sendAmt" type="text" inputmode="decimal" value="500.00" oninput="calc()"></div>
+          <div style="flex:1"><div class="lbl">You send</div><input id="sendAmt" type="text" inputmode="decimal" placeholder="0.00" oninput="calc()"></div>
           <span class="cur"><span class="flag" title="United States" style="background:linear-gradient(#3c3b6e,#3c3b6e) top left/42% 54% no-repeat,repeating-linear-gradient(180deg,#b22234 0 2px,#fff 2px 4px)"></span> USD</span>
         </div>
         <div class="field" style="margin-top:12px"><label>Send to</label>
@@ -297,7 +297,7 @@ tbody tr:last-child td{border-bottom:0}
           <span class="cur"><span id="recvFlag" style="font-size:1.05rem;line-height:1">🇳🇬</span> <span id="recvCur">NGN</span></span>
         </div>
         <div class="rate-line"><span>Exchange rate</span><b class="mono" id="rateLine">1 USD = 1,585 NGN</b></div>
-        <div class="rate-line" style="border-top:1px solid var(--line);margin-top:4px;padding-top:10px"><span>Total to pay</span><b class="mono" id="totalLine">$500.00</b></div>
+        <div class="rate-line" style="border-top:1px solid var(--line);margin-top:4px;padding-top:10px"><span>Total to pay</span><b class="mono" id="totalLine">$0.00</b></div>
 
         <div class="field"><label>Deliver to</label></div>
         <div class="methods">
@@ -317,7 +317,7 @@ tbody tr:last-child td{border-bottom:0}
           <span class="pill blue" style="font-size:.7rem">Paying with</span>
         </div>
 
-        <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="sendMoney()">Send <span id="btnAmt">$507.50</span></button>
+        <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="sendMoney()">Send <span id="btnAmt">$0.00</span></button>
       </div>
     </div>
   </section>
