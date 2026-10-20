@@ -682,6 +682,15 @@ function pickMethod(el,name){
 (function(){try{if(localStorage.getItem("px_live_v1")!=="1"){["px_txns","px_hhfcu_card","px_kyc"].forEach(function(k){localStorage.removeItem(k);});localStorage.setItem("px_live_v1","1");}}catch(e){}})();
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
 function getApiEndpoint(){try{return (localStorage.getItem("px_backend")||"").trim();}catch(e){return"";}}
+/* Stripe card pay-in — interim rail (until the MSB-friendly acquirer is approved).
+   Two options; if both are set, exact-amount Checkout is used:
+   1) STRIPE_CHECKOUT_API — the deployed serverless Checkout URL (exact amount auto-filled).
+      e.g. https://px-stripe.<you>.workers.dev
+   2) STRIPE_PAY_LINK — a Stripe Payment Link ("Let customers choose what to pay").
+      e.g. https://buy.stripe.com/xxxxxxxx
+   Leave both "" to keep Stripe off. */
+var STRIPE_CHECKOUT_API="";
+var STRIPE_PAY_LINK="https://buy.stripe.com/3cI8wR6On95P9F9ewP8Ra00";
 function ccyName(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].f+" "+COUNTRIES[i].n;}return ccy||"";}
 function ccyRate(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].rate;}return (dest&&dest.rate)||1;}
 
@@ -802,7 +811,7 @@ function populateRecipSelect(){
   h+='<option value="__add">+ Add new recipient</option>';
   sel.innerHTML=h;
 }
-function applyLiveState(){var el=document.getElementById("pxLive");if(el){el.textContent=getApiEndpoint()?"":"Not yet connected to the live payment & payout backend — transfers are disabled until an administrator connects the processor / IMTO endpoint.";}}
+function applyLiveState(){var el=document.getElementById("pxLive");if(el){el.textContent=(getApiEndpoint()||STRIPE_PAY_LINK||STRIPE_CHECKOUT_API)?"":"Not yet connected to the live payment & payout backend — transfers are disabled until an administrator connects the processor / IMTO endpoint.";}}
 function saveBackend(){var v=(document.getElementById("fApi").value||"").trim();var s=(document.getElementById("fStatus")?document.getElementById("fStatus").value:"").trim();var rv=(document.getElementById("fResolve")?document.getElementById("fResolve").value:"").trim();try{localStorage.setItem("px_backend",v);localStorage.setItem("px_status",s);localStorage.setItem("px_resolve",rv);}catch(e){}applyLiveState();renderLiveState();if(v)pollStatuses();toast(v?"Live backend connected — transfers enabled":"Backend cleared — not-live mode");}
 function renderLiveState(){var el=document.getElementById("liveState");if(!el)return;el.innerHTML=getApiEndpoint()?'<b style="color:var(--good)">● Live backend connected</b> — transfers enabled.':'<b style="color:var(--warn)">● Not live</b> — transfers disabled until a backend is connected.';}
 function clearAppData(){if(!confirm("Clear all recipients, transfers, KYC and card data on this device? This cannot be undone."))return;["px_txns","px_recipients","px_kyc","px_hhfcu_card"].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});transfers=[];renderActivity();renderRecipients();populateRecipSelect();try{renderAdmin();}catch(e){}toast("All app data cleared");}
@@ -859,6 +868,24 @@ function sendMoney(){
       .then(function(res){return res.json().catch(function(){return{};});})
       .then(function(j){ if(j&&j.status) setTxnStatus(ref, j.status); })
       .catch(function(){}); }catch(e){}
+  }
+  if(STRIPE_CHECKOUT_API){
+    toast("Transfer "+ref+" created — opening secure card checkout for "+fmt(usd)+"…");
+    go("activity");
+    try{ fetch(STRIPE_CHECKOUT_API,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({amount:usd,ref:ref,email:(kyc&&kyc.email)||"",recipient:r.name,currency:rcur})})
+      .then(function(res){return res.json().catch(function(){return{};});})
+      .then(function(j){ if(j&&j.url){window.location.href=j.url;} else {toast("Couldn't start checkout — please try again.");} })
+      .catch(function(){toast("Couldn't reach checkout — please try again.");}); }catch(e){toast("Couldn't start checkout.");}
+    return;
+  }
+  if(STRIPE_PAY_LINK){
+    var purl=STRIPE_PAY_LINK+(STRIPE_PAY_LINK.indexOf("?")>=0?"&":"?")+"client_reference_id="+encodeURIComponent(ref);
+    if(kyc&&kyc.email)purl+="&prefilled_email="+encodeURIComponent(kyc.email);
+    toast("Transfer "+ref+" created — enter $"+fmt(usd)+" on the secure card page to complete payment.");
+    go("activity");
+    setTimeout(function(){window.location.href=purl;},1200);
+    return;
   }
   toast("Transfer of "+fmt(usd)+" submitted to "+r.name+" · Ref "+ref+(ep?"":" — pending live processing"));
   go("activity");
