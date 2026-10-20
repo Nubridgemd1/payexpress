@@ -704,6 +704,10 @@ function getApiEndpoint(){try{return (localStorage.getItem("px_backend")||"").tr
    Leave both "" to keep Stripe off. */
 var STRIPE_CHECKOUT_API="";
 var STRIPE_PAY_LINK="https://buy.stripe.com/dRm6oJfkTdm58B5dsL8Ra01";
+/* Pay-by-bank (Plaid Transfer) Worker URL. When set, "Pay by bank" becomes the
+   preferred rail and funds settle to the HHFCU FBO account. Fallback-ready:
+   the same URL can front Dwolla/Trustly instead of Plaid without an app change. */
+var PLAID_TRANSFER_API="";
 function ccyName(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].f+" "+COUNTRIES[i].n;}return ccy||"";}
 function ccyRate(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].rate;}return (dest&&dest.rate)||1;}
 
@@ -824,7 +828,7 @@ function populateRecipSelect(){
   h+='<option value="__add">+ Add new recipient</option>';
   sel.innerHTML=h;
 }
-function applyLiveState(){var el=document.getElementById("pxLive");if(el){el.textContent=(getApiEndpoint()||STRIPE_PAY_LINK||STRIPE_CHECKOUT_API)?"":"Not yet connected to the live payment & payout backend — transfers are disabled until an administrator connects the processor / IMTO endpoint.";}}
+function applyLiveState(){var el=document.getElementById("pxLive");if(el){el.textContent=(getApiEndpoint()||PLAID_TRANSFER_API||STRIPE_PAY_LINK||STRIPE_CHECKOUT_API)?"":"Not yet connected to the live payment & payout backend — transfers are disabled until an administrator connects the processor / IMTO endpoint.";}}
 function saveBackend(){var v=(document.getElementById("fApi").value||"").trim();var s=(document.getElementById("fStatus")?document.getElementById("fStatus").value:"").trim();var rv=(document.getElementById("fResolve")?document.getElementById("fResolve").value:"").trim();try{localStorage.setItem("px_backend",v);localStorage.setItem("px_status",s);localStorage.setItem("px_resolve",rv);}catch(e){}applyLiveState();renderLiveState();if(v)pollStatuses();toast(v?"Live backend connected — transfers enabled":"Backend cleared — not-live mode");}
 function renderLiveState(){var el=document.getElementById("liveState");if(!el)return;el.innerHTML=getApiEndpoint()?'<b style="color:var(--good)">● Live backend connected</b> — transfers enabled.':'<b style="color:var(--warn)">● Not live</b> — transfers disabled until a backend is connected.';}
 function clearAppData(){if(!confirm("Clear all recipients, transfers, KYC and card data on this device? This cannot be undone."))return;["px_txns","px_recipients","px_kyc","px_hhfcu_card"].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});transfers=[];renderActivity();renderRecipients();populateRecipSelect();try{renderAdmin();}catch(e){}toast("All app data cleared");}
@@ -905,6 +909,10 @@ function sendMoney(){
       .then(function(j){ if(j&&j.status) setTxnStatus(ref, j.status); })
       .catch(function(){}); }catch(e){}
   }
+  if(PLAID_TRANSFER_API){
+    payByBank(rec,usd,kyc,r,rcur);
+    return;
+  }
   if(STRIPE_CHECKOUT_API){
     toast("Transfer "+ref+" created — opening secure card checkout for "+fmt(usd)+"…");
     go("activity");
@@ -925,6 +933,47 @@ function sendMoney(){
   }
   toast("Transfer of "+fmt(usd)+" submitted to "+r.name+" · Ref "+ref+(ep?"":" — pending live processing"));
   go("activity");
+}
+
+/* ---- Pay by bank (Plaid Transfer) ---- */
+function ensurePlaid(cb){
+  if(window.Plaid){cb(true);return;}
+  var s=document.createElement("script");
+  s.src="https://cdn.plaid.com/link/v2/stable/link-initialize.js";
+  s.onload=function(){cb(!!window.Plaid);};
+  s.onerror=function(){cb(false);};
+  document.head.appendChild(s);
+}
+function payByBank(rec,usd,kyc,r,rcur){
+  var api=PLAID_TRANSFER_API.replace(/\/+$/,"");
+  toast("Transfer "+rec.ref+" created — opening your bank to pay "+fmt(usd)+"…");
+  ensurePlaid(function(ok){
+    if(!ok){toast("Couldn't load the bank connection. Please try again.");return;}
+    fetch(api+"/link-token",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({userId:(kyc&&kyc.email)||rec.ref})})
+    .then(function(res){return res.json().catch(function(){return{};});})
+    .then(function(j){
+      if(!j||!j.link_token){toast("Couldn't start the bank connection.");return;}
+      var handler=window.Plaid.create({
+        token:j.link_token,
+        onSuccess:function(public_token,meta){
+          var acct=(meta&&meta.accounts&&meta.accounts[0]&&meta.accounts[0].id)||null;
+          toast("Verifying your bank and funding "+fmt(usd)+"…");
+          fetch(api+"/create-transfer",{method:"POST",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({public_token:public_token,account_id:acct,amount:usd,ref:rec.ref,name:(kyc&&kyc.name)||rec.sender||"",email:(kyc&&kyc.email)||""})})
+          .then(function(res){return res.json().catch(function(){return{};});})
+          .then(function(t){
+            if(t&&t.declined){toast("Your bank payment was declined"+(t.reason?": "+t.reason:"")+".");setTxnStatus(rec.ref,"failed");}
+            else if(t&&t.transfer_id){toast("Payment started — "+r.name+" will be paid once funds clear. Ref "+rec.ref);}
+            else {toast((t&&t.error)?("Payment error: "+t.error):"Couldn't complete the bank payment. Please try again.");}
+          }).catch(function(){toast("Couldn't reach the payment service. Please try again.");});
+        },
+        onExit:function(err,meta){ if(err){toast("Bank connection closed before completing.");} }
+      });
+      handler.open();
+      go("activity");
+    }).catch(function(){toast("Couldn't reach the bank connection service.");});
+  });
 }
 
 function loadCfg(){
