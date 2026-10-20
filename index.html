@@ -696,7 +696,7 @@ function getApiEndpoint(){try{return (localStorage.getItem("px_backend")||"").tr
       e.g. https://buy.stripe.com/xxxxxxxx
    Leave both "" to keep Stripe off. */
 var STRIPE_CHECKOUT_API="";
-var STRIPE_PAY_LINK="https://buy.stripe.com/3cI8wR6On95P9F9ewP8Ra00";
+var STRIPE_PAY_LINK="https://buy.stripe.com/dRm6oJfkTdm58B5dsL8Ra01";
 function ccyName(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].f+" "+COUNTRIES[i].n;}return ccy||"";}
 function ccyRate(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].rate;}return (dest&&dest.rate)||1;}
 
