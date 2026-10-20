@@ -334,6 +334,7 @@ tbody tr:last-child td{border-bottom:0}
         <thead><tr><th>Recipient</th><th>Method</th><th class="n">Sent</th><th class="n">Received</th><th style="text-align:right">Status</th></tr></thead>
         <tbody id="actBody"></tbody>
       </table></div>
+      <div style="font-size:.76rem;color:var(--muted);margin-top:9px">Tap a transfer to view its receipt.</div>
     </div>
 
     <div class="section-h" style="margin-top:26px"><div><div class="eyebrow">How a transfer moves</div><h2 style="font-size:1.35rem;margin-top:3px">Request to payout</h2></div></div>
@@ -346,6 +347,12 @@ tbody tr:last-child td{border-bottom:0}
         <div class="node"><div class="num">5</div><h4>Payout</h4><p>Naira to recipient</p></div>
       </div>
     </div>
+  </section>
+
+  <!-- RECEIPT -->
+  <section class="view" id="view-receipt">
+    <div class="section-h"><div><div class="eyebrow">Confirmation</div><h1 style="font-size:1.5rem;margin-top:3px">Transfer receipt</h1></div><button class="btn" onclick="go('activity')">Back</button></div>
+    <div class="card pad" id="receiptBody"></div>
   </section>
 
   <!-- CARDS -->
@@ -824,14 +831,15 @@ function clearAppData(){if(!confirm("Clear all recipients, transfers, KYC and ca
 
 /* activity — from stored transactions */
 function getTxns(){try{return JSON.parse(localStorage.getItem("px_txns")||"[]")}catch(e){return[];}}
-function mapTxn(t){return {name:t.recipient||t.name||"",method:t.method,usd:t.usd,ccy:t.ccy,rate:t.rate,status:(/paid|complete|success|delivered/i.test(t.status||"")?"paid":"proc"),date:(t.date&&String(t.date).length>12)?new Date(t.date).toLocaleDateString("en-US",{month:"short",day:"2-digit"}):(t.date||"")};}
+function mapTxn(t){return {ref:t.ref,name:t.recipient||t.name||"",method:t.method,usd:t.usd,ccy:t.ccy,rate:t.rate,status:(/paid|complete|success|delivered/i.test(t.status||"")?"paid":"proc"),date:(t.date&&String(t.date).length>12)?new Date(t.date).toLocaleDateString("en-US",{month:"short",day:"2-digit"}):(t.date||"")};}
 var transfers=getTxns().map(mapTxn);
 /* status callback — backend reports a transfer's state; the app reflects it */
 function getStatusUrl(){try{return (localStorage.getItem("px_status")||"").trim();}catch(e){return"";}}
 function displayStatus(s){s=String(s||"").toLowerCase();if(/paid|deliver|complete|success|settled/.test(s))return"Paid out";if(/fail|reject|cancel|declin/.test(s))return"Failed";if(/refund/.test(s))return"Refunded";return"Processing";}
-function setTxnStatus(ref,backendStatus){var disp=displayStatus(backendStatus);
-  try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");var ch=false;for(var i=0;i<a.length;i++){if(a[i].ref===ref&&a[i].status!==disp){a[i].status=disp;ch=true;}}if(ch)localStorage.setItem("px_txns",JSON.stringify(a));}catch(e){}
-  transfers=getTxns().map(mapTxn);if(document.getElementById("actBody"))renderActivity();try{if(typeof renderAdmin==="function")renderAdmin();}catch(e){}}
+function setTxnStatus(ref,backendStatus){var disp=displayStatus(backendStatus);var ch=false;
+  try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");for(var i=0;i<a.length;i++){if(a[i].ref===ref&&a[i].status!==disp){a[i].status=disp;ch=true;}}if(ch)localStorage.setItem("px_txns",JSON.stringify(a));}catch(e){}
+  transfers=getTxns().map(mapTxn);if(document.getElementById("actBody"))renderActivity();try{if(typeof renderAdmin==="function")renderAdmin();}catch(e){}
+  if(ch&&disp==="Paid out"){try{var tt=findTxn(ref);toast("Delivered - "+((tt&&tt.recipient)||"your beneficiary")+" received the payout (Ref "+ref+")");}catch(e){}}}
 function pollStatuses(){var su=getStatusUrl();if(!su)return;
   var a=getTxns().filter(function(t){return /process/i.test(t.status||"");}).slice(0,25);
   a.forEach(function(t){try{fetch(su+(su.indexOf("?")>=0?"&":"?")+"ref="+encodeURIComponent(t.ref)).then(function(r){return r.json().catch(function(){return{};});}).then(function(j){if(j&&j.status)setTxnStatus(t.ref,j.status);}).catch(function(){});}catch(e){}});}
@@ -843,10 +851,32 @@ function renderActivity(){
   for(var i=0;i<transfers.length;i++){var t=transfers[i];
     var tag=t.status==="paid"?'<span class="tag paid">Paid out</span>':'<span class="tag proc">Processing</span>';
     var payout=fmtN(t.usd*(t.rate||1))+" "+(t.ccy||"");
-    h+='<tr><td>'+esc(t.name)+'</td><td>'+esc(t.method)+'</td><td class="n mono">'+fmt(t.usd)+'</td><td class="n mono">'+payout+'</td><td style="text-align:right">'+tag+'</td></tr>';
+    h+='<tr style="cursor:pointer" onclick="openReceipt(\''+esc(t.ref||"")+'\')"><td>'+esc(t.name)+'</td><td>'+esc(t.method)+'</td><td class="n mono">'+fmt(t.usd)+'</td><td class="n mono">'+payout+'</td><td style="text-align:right">'+tag+'</td></tr>';
   }
   b.innerHTML=h;
 }
+/* Transfer receipt / paid confirmation - shows "Delivered to beneficiary" once the IMTO/payout backend confirms */
+function findTxn(ref){var a=getTxns();for(var i=0;i<a.length;i++){if(a[i].ref===ref)return a[i];}return null;}
+function rcvAmt(t){return fmtN(Math.round((t.usd||0)*(t.rate||1)))+" "+(t.ccy||"");}
+function openReceipt(ref){var t=findTxn(ref);var box=document.getElementById("receiptBody");if(!box)return;box.innerHTML=t?receiptHtml(t):'<p class="lead">Receipt not found.</p>';go("receipt");}
+function receiptRow(k,v){return '<div style="display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line2)"><span style="color:var(--muted)">'+k+'</span><span style="font-weight:600;text-align:right">'+esc(v)+'</span></div>';}
+function receiptHtml(t){
+  var paid=/paid|deliver|complete|success|settled/i.test(t.status||"");
+  var when=t.date?new Date(t.date).toLocaleString():"";
+  var banner=paid
+    ?'<div style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);color:#0b7a53;border-radius:12px;padding:14px 16px;margin-bottom:16px"><b>Delivered to beneficiary.</b><br><span style="font-size:.85rem">'+esc(t.recipient||"")+' has received '+rcvAmt(t)+'.</span></div>'
+    :'<div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);color:#8a6d1f;border-radius:12px;padding:14px 16px;margin-bottom:16px"><b>In progress.</b><br><span style="font-size:.85rem">You will get a confirmation here as soon as '+esc(t.recipient||"your beneficiary")+' receives the payout.</span></div>';
+  var dest=(t.bank?t.bank+" - ":"")+(t.acct||"");
+  return banner
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:1.05rem">PayExpress</b><span class="pill '+(paid?"good":"blue")+'" style="font-size:.72rem">'+(paid?"Paid out":"Processing")+'</span></div>'
+    +receiptRow("Reference",t.ref||"")+receiptRow("Date",when)+receiptRow("Sender",t.sender||"-")
+    +receiptRow("Recipient",t.recipient||"")+receiptRow("Destination",dest||"-")
+    +receiptRow("Country",cleanCountry(t.ccy)||(t.country||"-"))+receiptRow("Method",t.method||"")
+    +receiptRow("Amount sent",fmt(t.usd))+receiptRow("FX rate","1 USD = "+fmtN(t.rate||1)+" "+(t.ccy||""))
+    +receiptRow("Amount received",rcvAmt(t))
+    +'<div style="display:flex;gap:9px;margin-top:16px"><button class="btn btn-primary" style="flex:1" onclick="shareReceipt(\''+esc(t.ref||"")+'\')">Share receipt</button><button class="btn" onclick="go(\'activity\')">Done</button></div>';
+}
+function shareReceipt(ref){var t=findTxn(ref);if(!t)return;var paid=/paid|deliver|complete|success|settled/i.test(t.status||"");var txt="PayExpress receipt "+t.ref+"\\n"+(paid?"Status: Delivered to beneficiary":"Status: Processing")+"\\nTo: "+(t.recipient||"")+"\\nSent: "+fmt(t.usd)+"\\nReceived: "+rcvAmt(t)+"\\nDate: "+(t.date?new Date(t.date).toLocaleString():"");try{if(navigator.share){navigator.share({title:"PayExpress receipt "+t.ref,text:txt});return;}}catch(e){}try{navigator.clipboard.writeText(txt);toast("Receipt copied");}catch(e){toast("Receipt "+t.ref);}}
 function persistTxn(t){try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");a.unshift(t);localStorage.setItem("px_txns",JSON.stringify(a.slice(0,500)));}catch(e){}}
 function markPaid(ref){try{var a=JSON.parse(localStorage.getItem("px_txns")||"[]");for(var i=0;i<a.length;i++)if(a[i].ref===ref)a[i].status="Paid out";localStorage.setItem("px_txns",JSON.stringify(a));}catch(e){}}
 function sendMoney(){
