@@ -309,10 +309,16 @@ tbody tr:last-child td{border-bottom:0}
           <select id="recip" onchange="if(this.value==='__add'){go('recipients');this.selectedIndex=0;}"></select>
         </div>
 
-        <div class="pay-chip">
+        <div class="pay-chip" id="payChip">
           <div class="cc"></div>
-          <div style="flex:1"><div style="font-weight:600;font-size:.9rem" class="mono">Visa ****4242</div><div style="font-size:.78rem;color:var(--muted)">Your card on file</div></div>
-          <span class="pill blue" style="font-size:.7rem">Paying with</span>
+          <div style="flex:1"><div style="font-weight:600;font-size:.9rem" class="mono" id="pcName">Add a card</div><div style="font-size:.78rem;color:var(--muted)" id="pcSub">Tap Change to add your card</div></div>
+          <button type="button" class="pill blue" style="font-size:.7rem;border:0;cursor:pointer" onclick="openCardEdit()">Change</button>
+        </div>
+        <div id="cardEdit" style="display:none;margin-top:10px;border:1px solid var(--line2);border-radius:10px;padding:13px;background:var(--card2)">
+          <div class="field"><label>Card number</label><input id="ccNum" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456"></div>
+          <div class="field"><label>Name on card</label><input id="ccName" autocomplete="cc-name" placeholder="Full name"></div>
+          <div style="display:flex;gap:8px"><button type="button" class="btn btn-primary" style="flex:1" onclick="savePayCard()">Save card</button><button type="button" class="btn" style="flex:0 0 auto" onclick="cancelCardEdit()">Cancel</button></div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:9px">Only the brand &amp; last 4 digits are stored on this device - your full card is entered securely at checkout.</div>
         </div>
 
         <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="sendMoney()">Send <span id="btnAmt">$0.00</span></button>
@@ -905,6 +911,13 @@ function rmKyc(key,i){KYCF[key].splice(i,1);renderKyc(key);}
 function renderKyc(key){var box=document.getElementById("f-"+key);if(!box)return;var h="";for(var i=0;i<KYCF[key].length;i++){var f=KYCF[key][i];var th=f.url?'<img class="dz-thumb" alt="" src="'+f.url+'">':'<span class="dz-thumb">'+(f.name.split(".").pop()||"FILE").toUpperCase().slice(0,4)+'</span>';h+='<div class="dz-file">'+th+'<div class="dz-meta"><div class="dz-name">'+f.name+'</div><div class="dz-size">'+kbSize(f.size)+'</div></div><button class="dz-x" onclick="rmKyc(\''+key+'\','+i+')">x</button></div>';}box.innerHTML=h;}
 function cardHtml(c){return '<div class="hhfcu-card"><div class="co">PayExpress</div><div class="by">Debit<br>HHFCU</div><div class="chip"></div><div class="num mono">4127  88**  ****  '+c.last4+'</div><div class="row"><span>'+c.holder+'</span><span>'+(c.virtual?"VIRTUAL":"DEBIT")+'</span></div></div>';}
 function getCard(){try{return JSON.parse(localStorage.getItem("px_hhfcu_card")||"null")}catch(e){return null;}}
+/* "Paying with" card on file - editable; only brand+last4 kept on device (full card entered at checkout) */
+function getPayCard(){try{return JSON.parse(localStorage.getItem("px_pay_card")||"null")}catch(e){return null;}}
+function cardBrand(n){n=String(n||"").replace(/\D/g,"");if(/^4/.test(n))return"Visa";if(/^5[1-5]/.test(n)||/^2[2-7]/.test(n))return"Mastercard";if(/^3[47]/.test(n))return"Amex";if(/^6(?:011|5)/.test(n))return"Discover";return"Card";}
+function renderPayChip(){var nm=document.getElementById("pcName"),sub=document.getElementById("pcSub");if(!nm)return;var c=getPayCard();if(c&&c.last4){nm.textContent=c.brand+" ****"+c.last4;sub.textContent=(c.name?c.name+" - ":"")+"Your card on file";}else{nm.textContent="Add a card";sub.textContent="Tap Change to add your card";}}
+function openCardEdit(){var e=document.getElementById("cardEdit");if(!e)return;var c=getPayCard();var nn=document.getElementById("ccName");if(nn)nn.value=(c&&c.name)?c.name:"";var cn=document.getElementById("ccNum");if(cn)cn.value="";e.style.display=(e.style.display==="block"?"none":"block");}
+function cancelCardEdit(){var e=document.getElementById("cardEdit");if(e)e.style.display="none";}
+function savePayCard(){var raw=((document.getElementById("ccNum")||{}).value||"").replace(/\D/g,"");var name=((document.getElementById("ccName")||{}).value||"").trim();if(raw.length<12){toast("Enter a valid card number");return;}var card={brand:cardBrand(raw),last4:raw.slice(-4),name:name.toUpperCase().slice(0,26)};try{localStorage.setItem("px_pay_card",JSON.stringify(card));}catch(e){}renderPayChip();cancelCardEdit();toast("Card on file updated - "+card.brand+" ****"+card.last4);}
 function renderHhfcuCard(){
   var c=getCard();var box=document.getElementById("hhfcuCardBox");
   if(box){ box.innerHTML = (c&&c.issued) ? '<div style="font-weight:600;color:var(--ink);margin-bottom:10px">Your HHFCU debit card</div>'+cardHtml(c)+(c.plastic?'<p style="font-size:.82rem;color:var(--muted);margin-top:8px">Plastic card mailed in 7-10 business days.</p>':'') : '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h3 style="font-size:1.05rem;color:var(--ink)">Your HHFCU debit card</h3><p style="font-size:.88rem;color:var(--muted);margin-top:2px">Verify your identity to request a virtual or plastic card.</p></div><button class="btn btn-primary" onclick="go(\'verify\')">Get your card</button></div>'; }
@@ -994,7 +1007,7 @@ function renderAdmin(){
 function initAdmin(){renderAdmin();}
 
 loadRates(); loadCfg(); fillCountrySelects(); calc(); renderActivity(); renderHhfcuCard(); initAdmin();
-renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState();
+renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState(); renderPayChip();
 (function(){var fa=document.getElementById("fApi");if(fa)fa.value=getApiEndpoint();var fs=document.getElementById("fStatus");if(fs)fs.value=getStatusUrl();var fr=document.getElementById("fResolve");if(fr)fr.value=getResolveUrl();renderLiveState();})();
 pollStatuses(); setInterval(pollStatuses, 60000);
 </script>
