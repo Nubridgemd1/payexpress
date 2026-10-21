@@ -1,5 +1,5 @@
 /* PayExpress service worker — app-shell cache for offline + installability. */
-const CACHE = 'payexpress-v8';
+const CACHE = 'payexpress-v9';
 const SHELL = [
   './',
   './index.html',
