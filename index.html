@@ -241,16 +241,19 @@ tbody tr:last-child td{border-bottom:0}
 .pin-opt svg{width:18px;height:18px}
 .pin-opt[aria-pressed="true"]{border-color:var(--blue);color:var(--blue-dark);background:var(--blue-wash)}
 .pv-panel{margin-top:12px;border:1px solid var(--line2);border-radius:13px;background:linear-gradient(180deg,var(--card),var(--card2));overflow:hidden}
-.pv-head{display:flex;align-items:center;gap:9px;padding:11px 13px;background:linear-gradient(120deg,#0b3b8c,#2b7de9);color:#fff}
-.pv-head .pv-logo{font-family:var(--disp);font-weight:700;font-size:1.02rem;letter-spacing:.2px}
-.pv-head .pv-tag{font-size:.74rem;opacity:.92;margin-left:auto}
+.pv-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(120deg,#0b3b8c,#2b7de9);color:#fff}
+.pv-logo-chip{background:#fff;border-radius:9px;padding:4px 8px;display:inline-flex;align-items:center;flex:0 0 auto;box-shadow:0 1px 5px rgba(0,0,0,.2)}
+.pv-logo-chip img{height:28px;width:auto;display:block}
+.pv-logo-word{font-family:var(--disp);font-weight:800;font-size:1.3rem;letter-spacing:.3px}
+.pv-head .pv-tag{font-size:.72rem;opacity:.93;margin-left:auto;text-align:right;max-width:42%;line-height:1.3}
 .pv-body{padding:12px 13px}
 .pv-note{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.72rem;color:var(--muted);padding:9px 13px;border-top:1px dashed var(--line2)}
 .pv-note span{color:#b7791f;font-weight:600}
 .pv-amts{display:flex;gap:8px;margin-top:9px}
 .pv-amts input{flex:1;min-width:0}
 .pv-badge{display:flex;align-items:center;gap:10px;margin:0 0 15px;padding:10px 12px;border-radius:12px;background:linear-gradient(120deg,#0b3b8c,#2b7de9);color:#fff;cursor:pointer;box-shadow:var(--shadow)}
-.pv-badge-mark{font-family:var(--disp);font-weight:700;font-size:.9rem;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:999px;flex:0 0 auto}
+.pv-badge-mark{display:inline-flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:800;font-size:.92rem;color:#0b3b8c;background:#fff;padding:5px 11px;border-radius:999px;flex:0 0 auto;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.pv-badge-mark img{height:18px;width:auto;display:block}
 .pv-badge-txt{font-size:.78rem;line-height:1.38}
 .pv-badge-txt b{font-weight:700}
 </style>
@@ -288,7 +291,7 @@ tbody tr:last-child td{border-bottom:0}
       <div class="hero-copy">
         <div class="eyebrow">Send money globally</div>
         <h1>Money across borders in minutes, at a fair rate.</h1>
-        <p class="sub">Pay straight from your U.S. bank with Payvyn — or by card — and we deliver to their bank account, card, wallet, or cash pickup in 20+ countries. Great rates, clear fees, no surprises.</p>
+        <p class="sub">Pay straight from your U.S. bank with Payvyn, and we deliver to their bank account, card, wallet, or cash pickup in 20+ countries. Great rates, clear fees, no surprises.</p>
         <div class="trust">
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg> Bank-grade security</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M5 12l7 7 7-7"/></svg> Same-day payout</span>
@@ -302,7 +305,7 @@ tbody tr:last-child td{border-bottom:0}
 
       <div class="card calc">
         <div class="pv-badge" onclick="focusPayvyn()">
-          <span class="pv-badge-mark">Payvyn</span>
+          <span class="pv-badge-mark"><img src="assets/payvyn-mark.png" alt="">Payvyn</span>
           <span class="pv-badge-txt"><b>Pay direct from your U.S. bank.</b> No card needed — verified securely. <span style="text-decoration:underline">Use Payvyn ›</span></span>
         </div>
         <div class="fx-row">
@@ -332,29 +335,13 @@ tbody tr:last-child td{border-bottom:0}
         </div>
 
         <div class="field" style="margin-top:14px"><label>Pay from</label></div>
-        <div class="payin-toggle" id="payinToggle">
-          <button type="button" class="pin-opt" aria-pressed="false" onclick="pickPayin('card',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Card</button>
-          <button type="button" class="pin-opt" aria-pressed="true" onclick="pickPayin('payvyn',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M4 10v9h16v-9"/></svg>Bank · Payvyn</button>
-        </div>
-
-        <div id="payinCard" style="display:none">
-        <div class="pay-chip" id="payChip">
-          <div class="cc"></div>
-          <div style="flex:1"><div style="font-weight:600;font-size:.9rem" class="mono" id="pcName">Add a card</div><div style="font-size:.78rem;color:var(--muted)" id="pcSub">Tap Change to add your card</div></div>
-          <button type="button" class="pill blue" style="font-size:.7rem;border:0;cursor:pointer" onclick="openCardEdit()">Change</button>
-        </div>
-        <div id="cardEdit" style="display:none;margin-top:10px;border:1px solid var(--line2);border-radius:10px;padding:13px;background:var(--card2)">
-          <div class="field"><label>Card number</label><input id="ccNum" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456"></div>
-          <div class="field"><label>Name on card</label><input id="ccName" autocomplete="cc-name" placeholder="Full name"></div>
-          <div style="display:flex;gap:8px"><button type="button" class="btn btn-primary" style="flex:1" onclick="savePayCard()">Save card</button><button type="button" class="btn" style="flex:0 0 auto" onclick="cancelCardEdit()">Cancel</button></div>
-          <div style="font-size:.72rem;color:var(--muted);margin-top:9px">Only the brand &amp; last 4 digits are stored on this device - your full card is entered securely at checkout.</div>
-        </div>
-
-        </div><!-- /payinCard -->
-
-        <div id="payinPayvyn" style="display:block">
+        <div id="payinPayvyn">
           <div class="pv-panel">
-            <div class="pv-head"><span class="pv-logo">Payvyn</span><span class="pv-tag">Pay direct from your U.S. bank</span></div>
+            <div class="pv-head">
+              <span class="pv-logo-chip"><img src="assets/payvyn-mark.png" alt="Payvyn"></span>
+              <span class="pv-logo-word">Payvyn</span>
+              <span class="pv-tag">Pay direct from your U.S. bank</span>
+            </div>
             <div class="pv-body">
               <div class="pay-chip" id="pvChip" style="margin-top:0">
                 <div class="cc" style="background:linear-gradient(135deg,#0b3b8c,#2b7de9)"></div>
@@ -400,7 +387,7 @@ tbody tr:last-child td{border-bottom:0}
     <div class="card pad">
       <div class="cycle">
         <div class="node"><div class="num">1</div><h4>Quote</h4><p>Amount, rate, fee locked</p></div>
-        <div class="node"><div class="num">2</div><h4>Pay</h4><p>Charged to card on file</p></div>
+        <div class="node"><div class="num">2</div><h4>Pay</h4><p>Debited from your bank via Payvyn</p></div>
         <div class="node"><div class="num">3</div><h4>Screen</h4><p>KYC / AML / sanctions</p></div>
         <div class="node"><div class="num">4</div><h4>Settle</h4><p>Routed to IMTO in Nigeria</p></div>
         <div class="node"><div class="num">5</div><h4>Payout</h4><p>Naira to recipient</p></div>
@@ -754,29 +741,16 @@ function pickMethod(el,name){
 (function(){try{if(localStorage.getItem("px_live_v1")!=="1"){["px_txns","px_hhfcu_card","px_kyc"].forEach(function(k){localStorage.removeItem(k);});localStorage.setItem("px_live_v1","1");}}catch(e){}})();
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
 function getApiEndpoint(){try{return (localStorage.getItem("px_backend")||"").trim();}catch(e){return"";}}
-/* Stripe card pay-in — interim rail (until the MSB-friendly acquirer is approved).
-   Two options; if both are set, exact-amount Checkout is used:
-   1) STRIPE_CHECKOUT_API — the deployed serverless Checkout URL (exact amount auto-filled).
-      e.g. https://px-stripe.<you>.workers.dev
-   2) STRIPE_PAY_LINK — a Stripe Payment Link ("Let customers choose what to pay").
-      e.g. https://buy.stripe.com/xxxxxxxx
-   Leave both "" to keep Stripe off. */
-var STRIPE_CHECKOUT_API="";
-var STRIPE_PAY_LINK="https://buy.stripe.com/dRm6oJfkTdm58B5dsL8Ra01";
-/* Pay-by-bank (Plaid Transfer) Worker URL. When set, "Pay by bank" becomes the
-   preferred rail and funds settle to the HHFCU FBO account. Fallback-ready:
-   the same URL can front Dwolla/Trustly instead of Plaid without an app change. */
-var PLAID_TRANSFER_API="";
-/* Payvyn — native pay-from-bank rail (BizFormCorp's own platform, no aggregator).
-   Ownership is verified natively over ACH via the Payvyn verify backend. */
+/* Pay-in rail: PAYVYN ONLY. Card/Stripe pay-in has been removed — Payvyn
+   (pay direct from the sender's U.S. bank over ACH, ownership verified natively,
+   no aggregator) is the sole checkout for the pay-in leg. */
 var PAYVYN_VERIFY_API="https://payvyn-verify.fern-swift.workers.dev";
-var payin="payvyn";            /* "card" | "payvyn" — Payvyn (pay-from-bank) is the default */
+var payin="payvyn";            /* Payvyn is the only pay-in method */
 var PV={verifyId:null,demo:false,micro:null};
 function pvValidRouting(r){if(!/^\d{9}$/.test(r))return false;var d=r.split("").map(Number);var s=3*(d[0]+d[3]+d[6])+7*(d[1]+d[4]+d[7])+(d[2]+d[5]+d[8]);return s%10===0;}
 function getPayvynBank(){try{return JSON.parse(localStorage.getItem("px_payvyn_bank")||"null");}catch(e){return null;}}
 function setPayvynBank(b){try{localStorage.setItem("px_payvyn_bank",JSON.stringify(b));}catch(e){}}
-function focusPayvyn(){var t=document.getElementById("payinToggle");pickPayin("payvyn",t?t.querySelectorAll(".pin-opt")[1]:null);var p=document.getElementById("payinPayvyn");try{if(p&&p.scrollIntoView)p.scrollIntoView({behavior:"smooth",block:"center"});}catch(e){}if(!getPayvynBank())openPayvynLink();}
-function pickPayin(kind,el){payin=kind;var t=document.getElementById("payinToggle");if(t){var bs=t.querySelectorAll(".pin-opt");for(var i=0;i<bs.length;i++)bs[i].setAttribute("aria-pressed","false");}if(el)el.setAttribute("aria-pressed","true");var c=document.getElementById("payinCard"),p=document.getElementById("payinPayvyn");if(c)c.style.display=(kind==="payvyn"?"none":"block");if(p)p.style.display=(kind==="payvyn"?"block":"none");}
+function focusPayvyn(){var p=document.getElementById("payinPayvyn");try{if(p&&p.scrollIntoView)p.scrollIntoView({behavior:"smooth",block:"center"});}catch(e){}if(!getPayvynBank())openPayvynLink();}
 function renderPayvynChip(){var nm=document.getElementById("pvName"),sub=document.getElementById("pvSub"),btn=document.getElementById("pvLinkBtn");if(!nm)return;var b=getPayvynBank();if(b&&b.last4){nm.textContent=(b.bank?b.bank+" ":"Bank ")+"••••"+b.last4;sub.innerHTML='<span style="color:var(--good);font-weight:600">● Verified by Payvyn</span> — '+esc(b.type||"checking");if(btn)btn.textContent="Change";}else{nm.textContent="Link your bank";sub.textContent="Verified securely — no card needed";if(btn)btn.textContent="Link";}}
 function openPayvynLink(){var e=document.getElementById("pvEdit");if(!e)return;e.style.display=(e.style.display==="block"?"none":"block");document.getElementById("pvStep1").style.display="block";document.getElementById("pvStep2").style.display="none";PV.verifyId=null;PV.demo=false;}
 function pvStartDemo(note){PV.demo=true;var a=((Math.floor(Math.random()*44)+5)/100),b=((Math.floor(Math.random()*44)+5)/100);PV.micro=[a,b];document.getElementById("pvStep1").style.display="none";document.getElementById("pvStep2").style.display="block";document.getElementById("pvHint").innerHTML='Two micro-deposits are on the way to your account via ACH. <b>Demo'+(note?" "+esc(note):"")+':</b> enter <b>$'+a.toFixed(2)+'</b> and <b>$'+b.toFixed(2)+'</b> to confirm ownership.';}
@@ -949,7 +923,7 @@ function populateRecipSelect(){
   h+='<option value="__add">+ Add new recipient</option>';
   sel.innerHTML=h;
 }
-function applyLiveState(){var el=document.getElementById("pxLive");if(el){el.textContent=(getApiEndpoint()||PLAID_TRANSFER_API||STRIPE_PAY_LINK||STRIPE_CHECKOUT_API)?"":"Not yet connected to the live payment & payout backend — transfers are disabled until an administrator connects the processor / IMTO endpoint.";}}
+function applyLiveState(){var el=document.getElementById("pxLive");if(el){el.textContent=(getApiEndpoint()||PAYVYN_VERIFY_API)?"":"Not yet connected to the live payment & payout backend — transfers are disabled until an administrator connects the processor / IMTO endpoint.";}}
 function saveBackend(){var v=(document.getElementById("fApi").value||"").trim();var s=(document.getElementById("fStatus")?document.getElementById("fStatus").value:"").trim();var rv=(document.getElementById("fResolve")?document.getElementById("fResolve").value:"").trim();try{localStorage.setItem("px_backend",v);localStorage.setItem("px_status",s);localStorage.setItem("px_resolve",rv);}catch(e){}applyLiveState();renderLiveState();if(v)pollStatuses();toast(v?"Live backend connected — transfers enabled":"Backend cleared — not-live mode");}
 function renderLiveState(){var el=document.getElementById("liveState");if(!el)return;el.innerHTML=getApiEndpoint()?'<b style="color:var(--good)">● Live backend connected</b> — transfers enabled.':'<b style="color:var(--warn)">● Not live</b> — transfers disabled until a backend is connected.';}
 function clearAppData(){if(!confirm("Clear all recipients, transfers, KYC and card data on this device? This cannot be undone."))return;["px_txns","px_recipients","px_kyc","px_hhfcu_card"].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});transfers=[];renderActivity();renderRecipients();populateRecipSelect();try{renderAdmin();}catch(e){}toast("All app data cleared");}
@@ -1011,8 +985,8 @@ function sendMoney(){
   if(!rid||rid==="__add"){toast("Choose or add a recipient first");go("recipients");return;}
   var r=getRecipients().filter(function(x){return x.id===rid;})[0];
   if(!r){toast("Please add a recipient first");go("recipients");return;}
-  var pvBank=null;
-  if(payin==="payvyn"){pvBank=getPayvynBank();if(!pvBank||!pvBank.verified){toast("Link & verify your bank with Payvyn first");pickPayin("payvyn",document.querySelectorAll("#payinToggle .pin-opt")[1]);return;}}
+  var pvBank=getPayvynBank();
+  if(!pvBank||!pvBank.verified){toast("Link & verify your bank with Payvyn first");focusPayvyn();return;}
   var kyc=null;try{kyc=JSON.parse(localStorage.getItem("px_kyc")||"null")}catch(e){}
   var ep=getApiEndpoint();
   var rcur=r.ccy||(dest&&dest.ccy)||"", rrate=ccyRate(rcur);
@@ -1045,71 +1019,9 @@ function sendMoney(){
     go("activity");
     return;
   }
-  if(PLAID_TRANSFER_API){
-    payByBank(rec,usd,kyc,r,rcur);
-    return;
-  }
-  if(STRIPE_CHECKOUT_API){
-    toast("Transfer "+ref+" created — opening secure card checkout for "+fmt(usd)+"…");
-    go("activity");
-    try{ fetch(STRIPE_CHECKOUT_API,{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({amount:usd,ref:ref,email:(kyc&&kyc.email)||"",recipient:r.name,currency:rcur})})
-      .then(function(res){return res.json().catch(function(){return{};});})
-      .then(function(j){ if(j&&j.url){window.location.href=j.url;} else {toast("Couldn't start checkout — please try again.");} })
-      .catch(function(){toast("Couldn't reach checkout — please try again.");}); }catch(e){toast("Couldn't start checkout.");}
-    return;
-  }
-  if(STRIPE_PAY_LINK){
-    var purl=STRIPE_PAY_LINK+(STRIPE_PAY_LINK.indexOf("?")>=0?"&":"?")+"client_reference_id="+encodeURIComponent(ref);
-    if(kyc&&kyc.email)purl+="&prefilled_email="+encodeURIComponent(kyc.email);
-    toast("Transfer "+ref+" created — enter $"+fmt(usd)+" on the secure card page to complete payment.");
-    go("activity");
-    setTimeout(function(){window.location.href=purl;},1200);
-    return;
-  }
-  toast("Transfer of "+fmt(usd)+" submitted to "+r.name+" · Ref "+ref+(ep?"":" — pending live processing"));
+  /* Payvyn is the only pay-in rail — the branch above always returns. */
+  toast("Transfer of "+fmt(usd)+" submitted to "+r.name+" · Ref "+ref);
   go("activity");
-}
-
-/* ---- Pay by bank (Plaid Transfer) ---- */
-function ensurePlaid(cb){
-  if(window.Plaid){cb(true);return;}
-  var s=document.createElement("script");
-  s.src="https://cdn.plaid.com/link/v2/stable/link-initialize.js";
-  s.onload=function(){cb(!!window.Plaid);};
-  s.onerror=function(){cb(false);};
-  document.head.appendChild(s);
-}
-function payByBank(rec,usd,kyc,r,rcur){
-  var api=PLAID_TRANSFER_API.replace(/\/+$/,"");
-  toast("Transfer "+rec.ref+" created — opening your bank to pay "+fmt(usd)+"…");
-  ensurePlaid(function(ok){
-    if(!ok){toast("Couldn't load the bank connection. Please try again.");return;}
-    fetch(api+"/link-token",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({userId:(kyc&&kyc.email)||rec.ref})})
-    .then(function(res){return res.json().catch(function(){return{};});})
-    .then(function(j){
-      if(!j||!j.link_token){toast("Couldn't start the bank connection.");return;}
-      var handler=window.Plaid.create({
-        token:j.link_token,
-        onSuccess:function(public_token,meta){
-          var acct=(meta&&meta.accounts&&meta.accounts[0]&&meta.accounts[0].id)||null;
-          toast("Verifying your bank and funding "+fmt(usd)+"…");
-          fetch(api+"/create-transfer",{method:"POST",headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({public_token:public_token,account_id:acct,amount:usd,ref:rec.ref,name:(kyc&&kyc.name)||rec.sender||"",email:(kyc&&kyc.email)||""})})
-          .then(function(res){return res.json().catch(function(){return{};});})
-          .then(function(t){
-            if(t&&t.declined){toast("Your bank payment was declined"+(t.reason?": "+t.reason:"")+".");setTxnStatus(rec.ref,"failed");}
-            else if(t&&t.transfer_id){toast("Payment started — "+r.name+" will be paid once funds clear. Ref "+rec.ref);}
-            else {toast((t&&t.error)?("Payment error: "+t.error):"Couldn't complete the bank payment. Please try again.");}
-          }).catch(function(){toast("Couldn't reach the payment service. Please try again.");});
-        },
-        onExit:function(err,meta){ if(err){toast("Bank connection closed before completing.");} }
-      });
-      handler.open();
-      go("activity");
-    }).catch(function(){toast("Couldn't reach the bank connection service.");});
-  });
 }
 
 function loadCfg(){
@@ -1126,13 +1038,7 @@ function rmKyc(key,i){KYCF[key].splice(i,1);renderKyc(key);}
 function renderKyc(key){var box=document.getElementById("f-"+key);if(!box)return;var h="";for(var i=0;i<KYCF[key].length;i++){var f=KYCF[key][i];var th=f.url?'<img class="dz-thumb" alt="" src="'+f.url+'">':'<span class="dz-thumb">'+(f.name.split(".").pop()||"FILE").toUpperCase().slice(0,4)+'</span>';h+='<div class="dz-file">'+th+'<div class="dz-meta"><div class="dz-name">'+f.name+'</div><div class="dz-size">'+kbSize(f.size)+'</div></div><button class="dz-x" onclick="rmKyc(\''+key+'\','+i+')">x</button></div>';}box.innerHTML=h;}
 function cardHtml(c){return '<div class="hhfcu-card"><div class="co">PayExpress</div><div class="by">Debit<br>HHFCU</div><div class="chip"></div><div class="num mono">4127  88**  ****  '+c.last4+'</div><div class="row"><span>'+c.holder+'</span><span>'+(c.virtual?"VIRTUAL":"DEBIT")+'</span></div></div>';}
 function getCard(){try{return JSON.parse(localStorage.getItem("px_hhfcu_card")||"null")}catch(e){return null;}}
-/* "Paying with" card on file - editable; only brand+last4 kept on device (full card entered at checkout) */
-function getPayCard(){try{return JSON.parse(localStorage.getItem("px_pay_card")||"null")}catch(e){return null;}}
-function cardBrand(n){n=String(n||"").replace(/\D/g,"");if(/^4/.test(n))return"Visa";if(/^5[1-5]/.test(n)||/^2[2-7]/.test(n))return"Mastercard";if(/^3[47]/.test(n))return"Amex";if(/^6(?:011|5)/.test(n))return"Discover";return"Card";}
-function renderPayChip(){var nm=document.getElementById("pcName"),sub=document.getElementById("pcSub");if(!nm)return;var c=getPayCard();if(c&&c.last4){nm.textContent=c.brand+" ****"+c.last4;sub.textContent=(c.name?c.name+" - ":"")+"Your card on file";}else{nm.textContent="Add a card";sub.textContent="Tap Change to add your card";}}
-function openCardEdit(){var e=document.getElementById("cardEdit");if(!e)return;var c=getPayCard();var nn=document.getElementById("ccName");if(nn)nn.value=(c&&c.name)?c.name:"";var cn=document.getElementById("ccNum");if(cn)cn.value="";e.style.display=(e.style.display==="block"?"none":"block");}
-function cancelCardEdit(){var e=document.getElementById("cardEdit");if(e)e.style.display="none";}
-function savePayCard(){var raw=((document.getElementById("ccNum")||{}).value||"").replace(/\D/g,"");var name=((document.getElementById("ccName")||{}).value||"").trim();if(raw.length<12){toast("Enter a valid card number");return;}var card={brand:cardBrand(raw),last4:raw.slice(-4),name:name.toUpperCase().slice(0,26)};try{localStorage.setItem("px_pay_card",JSON.stringify(card));}catch(e){}renderPayChip();cancelCardEdit();toast("Card on file updated - "+card.brand+" ****"+card.last4);}
+/* Card-on-file pay-in removed — Payvyn (pay-from-bank) is the only pay-in rail. */
 function renderHhfcuCard(){
   var c=getCard();var box=document.getElementById("hhfcuCardBox");
   if(box){ box.innerHTML = (c&&c.issued) ? '<div style="font-weight:600;color:var(--ink);margin-bottom:10px">Your HHFCU debit card</div>'+cardHtml(c)+(c.plastic?'<p style="font-size:.82rem;color:var(--muted);margin-top:8px">Plastic card mailed in 7-10 business days.</p>':'') : '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h3 style="font-size:1.05rem;color:var(--ink)">Your HHFCU debit card</h3><p style="font-size:.88rem;color:var(--muted);margin-top:2px">Verify your identity to request a virtual or plastic card.</p></div><button class="btn btn-primary" onclick="go(\'verify\')">Get your card</button></div>'; }
@@ -1222,7 +1128,7 @@ function renderAdmin(){
 function initAdmin(){renderAdmin();}
 
 loadRates(); loadCfg(); fillCountrySelects(); calc(); renderActivity(); renderHhfcuCard(); initAdmin();
-renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState(); renderPayChip(); renderPayvynChip();
+renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState(); renderPayvynChip();
 (function(){var fa=document.getElementById("fApi");if(fa)fa.value=getApiEndpoint();var fs=document.getElementById("fStatus");if(fs)fs.value=getStatusUrl();var fr=document.getElementById("fResolve");if(fr)fr.value=getResolveUrl();renderLiveState();})();
 pollStatuses(); setInterval(pollStatuses, 60000);
 </script>
