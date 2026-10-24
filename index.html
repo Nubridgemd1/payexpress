@@ -795,15 +795,16 @@ function pvStart(){
       .then(function(d){
         if(!d||!d.ok){pvStartDemo("— service unavailable");return;}
         PV.verifyId=d.id;
-        document.getElementById("pvHint").innerHTML="Two micro-deposits are on the way to your account via ACH (same business day with Same-Day ACH). Enter the two amounts from your statement to confirm ownership.";
+        var hint="Two micro-deposits are on the way to your account via ACH (same business day with Same-Day ACH). Enter the two amounts from your statement to confirm ownership.";
+        if(d.sandboxAmounts&&d.sandboxAmounts.length===2){hint+=' <b>Sandbox:</b> enter <b>$'+esc(d.sandboxAmounts[0])+'</b> and <b>$'+esc(d.sandboxAmounts[1])+'</b>.';}
+        document.getElementById("pvHint").innerHTML=hint;
       }).catch(function(){pvStartDemo("— service unreachable");});
     return;
   }
   pvStartDemo("");
 }
 function pvFinish(rt,ac){
-  var bankName="";try{var sel=document.getElementById("pvRouting");}catch(e){}
-  var b={last4:ac.slice(-4),routing:rt,type:(document.getElementById("pvType")||{}).value||"checking",verified:true,ts:Date.now()};
+  var b={last4:ac.slice(-4),routing:rt,type:(document.getElementById("pvType")||{}).value||"checking",verified:true,verifyId:(PV.verifyId||null),ts:Date.now()};
   setPayvynBank(b);renderPayvynChip();
   document.getElementById("pvEdit").style.display="none";
   toast("Bank verified by Payvyn — ••••"+b.last4+" linked");
@@ -1033,7 +1034,14 @@ function sendMoney(){
       .catch(function(){}); }catch(e){}
   }
   if(payin==="payvyn"){
-    toast("Transfer "+ref+" created — "+fmt(usd)+" debited from your Payvyn-linked bank ••"+pvBank.last4+".");
+    var pbase=PAYVYN_VERIFY_API?PAYVYN_VERIFY_API.replace(/\/$/,""):"";
+    if(pbase&&pvBank&&pvBank.verifyId){
+      try{ fetch(pbase+"/payin/debit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:pvBank.verifyId,amountCents:Math.round(usd*100),ref:ref,name:(kyc&&kyc.name)||""})})
+        .then(function(res){return res.json().catch(function(){return null;});})
+        .then(function(d){ if(d&&d.ok&&d.status==="pending_settlement"){toast("Payvyn debit initiated — "+fmt(usd)+" from ••"+pvBank.last4+" (settling via ACH).");} })
+        .catch(function(){}); }catch(e){}
+    }
+    toast("Transfer "+ref+" created — "+fmt(usd)+" from your Payvyn-linked bank ••"+pvBank.last4+".");
     go("activity");
     return;
   }
