@@ -235,6 +235,20 @@ tbody tr:last-child td{border-bottom:0}
   .bfc{margin-bottom:calc(58px + env(safe-area-inset-bottom))}
   [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
 }
+/* Pay-from (pay-in) selector + Payvyn panel */
+.payin-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 2px}
+.pin-opt{display:flex;align-items:center;justify-content:center;gap:7px;border:1.5px solid var(--line2);background:var(--card);color:var(--body);font-family:inherit;font-weight:600;font-size:.85rem;padding:11px 8px;border-radius:11px;cursor:pointer;min-height:46px;touch-action:manipulation}
+.pin-opt svg{width:18px;height:18px}
+.pin-opt[aria-pressed="true"]{border-color:var(--blue);color:var(--blue-dark);background:var(--blue-wash)}
+.pv-panel{margin-top:12px;border:1px solid var(--line2);border-radius:13px;background:linear-gradient(180deg,var(--card),var(--card2));overflow:hidden}
+.pv-head{display:flex;align-items:center;gap:9px;padding:11px 13px;background:linear-gradient(120deg,#0b3b8c,#2b7de9);color:#fff}
+.pv-head .pv-logo{font-family:var(--disp);font-weight:700;font-size:1.02rem;letter-spacing:.2px}
+.pv-head .pv-tag{font-size:.74rem;opacity:.92;margin-left:auto}
+.pv-body{padding:12px 13px}
+.pv-note{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.72rem;color:var(--muted);padding:9px 13px;border-top:1px dashed var(--line2)}
+.pv-note span{color:#b7791f;font-weight:600}
+.pv-amts{display:flex;gap:8px;margin-top:9px}
+.pv-amts input{flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -309,6 +323,13 @@ tbody tr:last-child td{border-bottom:0}
           <select id="recip" onchange="if(this.value==='__add'){go('recipients');this.selectedIndex=0;}"></select>
         </div>
 
+        <div class="field" style="margin-top:14px"><label>Pay from</label></div>
+        <div class="payin-toggle" id="payinToggle">
+          <button type="button" class="pin-opt" aria-pressed="true" onclick="pickPayin('card',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Card</button>
+          <button type="button" class="pin-opt" aria-pressed="false" onclick="pickPayin('payvyn',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M4 10v9h16v-9"/></svg>Bank · Payvyn</button>
+        </div>
+
+        <div id="payinCard">
         <div class="pay-chip" id="payChip">
           <div class="cc"></div>
           <div style="flex:1"><div style="font-weight:600;font-size:.9rem" class="mono" id="pcName">Add a card</div><div style="font-size:.78rem;color:var(--muted)" id="pcSub">Tap Change to add your card</div></div>
@@ -319,6 +340,36 @@ tbody tr:last-child td{border-bottom:0}
           <div class="field"><label>Name on card</label><input id="ccName" autocomplete="cc-name" placeholder="Full name"></div>
           <div style="display:flex;gap:8px"><button type="button" class="btn btn-primary" style="flex:1" onclick="savePayCard()">Save card</button><button type="button" class="btn" style="flex:0 0 auto" onclick="cancelCardEdit()">Cancel</button></div>
           <div style="font-size:.72rem;color:var(--muted);margin-top:9px">Only the brand &amp; last 4 digits are stored on this device - your full card is entered securely at checkout.</div>
+        </div>
+
+        </div><!-- /payinCard -->
+
+        <div id="payinPayvyn" style="display:none">
+          <div class="pv-panel">
+            <div class="pv-head"><span class="pv-logo">Payvyn</span><span class="pv-tag">Pay direct from your U.S. bank</span></div>
+            <div class="pv-body">
+              <div class="pay-chip" id="pvChip" style="margin-top:0">
+                <div class="cc" style="background:linear-gradient(135deg,#0b3b8c,#2b7de9)"></div>
+                <div style="flex:1"><div style="font-weight:600;font-size:.9rem" id="pvName">Link your bank</div><div style="font-size:.78rem;color:var(--muted)" id="pvSub">Verified securely — no card needed</div></div>
+                <button type="button" class="pill blue" style="font-size:.7rem;border:0;cursor:pointer" id="pvLinkBtn" onclick="openPayvynLink()">Link</button>
+              </div>
+              <div id="pvEdit" style="display:none;margin-top:10px;border:1px solid var(--line2);border-radius:10px;padding:13px;background:var(--card2)">
+                <div class="field"><label>Routing number (ABA)</label><input id="pvRouting" inputmode="numeric" autocomplete="off" placeholder="9 digits" maxlength="9"></div>
+                <div class="field"><label>Account number</label><input id="pvAccount" inputmode="numeric" autocomplete="off" placeholder="Your account number"></div>
+                <div class="field"><label>Account type</label><select id="pvType"><option value="checking">Checking</option><option value="savings">Savings</option></select></div>
+                <div id="pvStep1">
+                  <button type="button" class="btn btn-primary" style="width:100%" onclick="pvStart()">Link &amp; verify bank</button>
+                  <div style="font-size:.72rem;color:var(--muted);margin-top:9px">Ownership is verified natively over ACH by Payvyn — no bank login, no third-party aggregator.</div>
+                </div>
+                <div id="pvStep2" style="display:none">
+                  <div id="pvHint" style="font-size:.82rem;color:var(--body);margin-bottom:8px"></div>
+                  <div class="pv-amts"><input id="pvA" class="field" inputmode="decimal" placeholder="$0.00" style="padding:11px;border:1px solid var(--line2);border-radius:10px;background:var(--card)"><input id="pvB" class="field" inputmode="decimal" placeholder="$0.00" style="padding:11px;border:1px solid var(--line2);border-radius:10px;background:var(--card)"></div>
+                  <button type="button" class="btn btn-primary" style="width:100%;margin-top:10px" onclick="pvConfirm()">Confirm deposits</button>
+                </div>
+              </div>
+            </div>
+            <div class="pv-note">Secured by Payvyn — bank ownership verified natively over ACH. <span>payvyn.org</span></div>
+          </div>
         </div>
 
         <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="sendMoney()">Send <span id="btnAmt">$0.00</span></button>
@@ -708,6 +759,66 @@ var STRIPE_PAY_LINK="https://buy.stripe.com/dRm6oJfkTdm58B5dsL8Ra01";
    preferred rail and funds settle to the HHFCU FBO account. Fallback-ready:
    the same URL can front Dwolla/Trustly instead of Plaid without an app change. */
 var PLAID_TRANSFER_API="";
+/* Payvyn — native pay-from-bank rail (BizFormCorp's own platform, no aggregator).
+   Ownership is verified natively over ACH via the Payvyn verify backend. */
+var PAYVYN_VERIFY_API="https://payvyn-verify.fern-swift.workers.dev";
+var payin="card";              /* "card" | "payvyn" */
+var PV={verifyId:null,demo:false,micro:null};
+function pvValidRouting(r){if(!/^\d{9}$/.test(r))return false;var d=r.split("").map(Number);var s=3*(d[0]+d[3]+d[6])+7*(d[1]+d[4]+d[7])+(d[2]+d[5]+d[8]);return s%10===0;}
+function getPayvynBank(){try{return JSON.parse(localStorage.getItem("px_payvyn_bank")||"null");}catch(e){return null;}}
+function setPayvynBank(b){try{localStorage.setItem("px_payvyn_bank",JSON.stringify(b));}catch(e){}}
+function pickPayin(kind,el){payin=kind;var t=document.getElementById("payinToggle");if(t){var bs=t.querySelectorAll(".pin-opt");for(var i=0;i<bs.length;i++)bs[i].setAttribute("aria-pressed","false");}if(el)el.setAttribute("aria-pressed","true");var c=document.getElementById("payinCard"),p=document.getElementById("payinPayvyn");if(c)c.style.display=(kind==="payvyn"?"none":"block");if(p)p.style.display=(kind==="payvyn"?"block":"none");}
+function renderPayvynChip(){var nm=document.getElementById("pvName"),sub=document.getElementById("pvSub"),btn=document.getElementById("pvLinkBtn");if(!nm)return;var b=getPayvynBank();if(b&&b.last4){nm.textContent=(b.bank?b.bank+" ":"Bank ")+"••••"+b.last4;sub.innerHTML='<span style="color:var(--good);font-weight:600">● Verified by Payvyn</span> — '+esc(b.type||"checking");if(btn)btn.textContent="Change";}else{nm.textContent="Link your bank";sub.textContent="Verified securely — no card needed";if(btn)btn.textContent="Link";}}
+function openPayvynLink(){var e=document.getElementById("pvEdit");if(!e)return;e.style.display=(e.style.display==="block"?"none":"block");document.getElementById("pvStep1").style.display="block";document.getElementById("pvStep2").style.display="none";PV.verifyId=null;PV.demo=false;}
+function pvStartDemo(note){PV.demo=true;var a=((Math.floor(Math.random()*44)+5)/100),b=((Math.floor(Math.random()*44)+5)/100);PV.micro=[a,b];document.getElementById("pvStep1").style.display="none";document.getElementById("pvStep2").style.display="block";document.getElementById("pvHint").innerHTML='Two micro-deposits are on the way to your account via ACH. <b>Demo'+(note?" "+esc(note):"")+':</b> enter <b>$'+a.toFixed(2)+'</b> and <b>$'+b.toFixed(2)+'</b> to confirm ownership.';}
+function pvStart(){
+  var rt=((document.getElementById("pvRouting")||{}).value||"").replace(/\D/g,"");
+  var ac=((document.getElementById("pvAccount")||{}).value||"").replace(/\D/g,"");
+  if(!pvValidRouting(rt)){toast("Enter a valid 9-digit routing number");return;}
+  if(ac.length<4){toast("Enter a valid account number");return;}
+  var kyc=null;try{kyc=JSON.parse(localStorage.getItem("px_kyc")||"null")}catch(e){}
+  PV.verifyId=null;PV.demo=false;
+  if(PAYVYN_VERIFY_API){
+    document.getElementById("pvStep1").style.display="none";document.getElementById("pvStep2").style.display="block";
+    document.getElementById("pvHint").textContent="Requesting two micro-deposits via Payvyn…";
+    fetch(PAYVYN_VERIFY_API.replace(/\/$/,"")+"/verify/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({routing:rt,account:ac,type:(document.getElementById("pvType")||{}).value||"checking",name:(kyc&&kyc.name)||"",email:(kyc&&kyc.email)||""})})
+      .then(function(res){return res.json().catch(function(){return null;});})
+      .then(function(d){
+        if(!d||!d.ok){pvStartDemo("— service unavailable");return;}
+        PV.verifyId=d.id;
+        document.getElementById("pvHint").innerHTML="Two micro-deposits are on the way to your account via ACH (same business day with Same-Day ACH). Enter the two amounts from your statement to confirm ownership.";
+      }).catch(function(){pvStartDemo("— service unreachable");});
+    return;
+  }
+  pvStartDemo("");
+}
+function pvFinish(rt,ac){
+  var bankName="";try{var sel=document.getElementById("pvRouting");}catch(e){}
+  var b={last4:ac.slice(-4),routing:rt,type:(document.getElementById("pvType")||{}).value||"checking",verified:true,ts:Date.now()};
+  setPayvynBank(b);renderPayvynChip();
+  document.getElementById("pvEdit").style.display="none";
+  toast("Bank verified by Payvyn — ••••"+b.last4+" linked");
+}
+function pvConfirm(){
+  var rt=((document.getElementById("pvRouting")||{}).value||"").replace(/\D/g,"");
+  var ac=((document.getElementById("pvAccount")||{}).value||"").replace(/\D/g,"");
+  var a=parseFloat(((document.getElementById("pvA")||{}).value||"").replace(/[^0-9.]/g,""));
+  var b=parseFloat(((document.getElementById("pvB")||{}).value||"").replace(/[^0-9.]/g,""));
+  if(isNaN(a)||isNaN(b)||a<=0||b<=0){toast("Enter both deposit amounts");return;}
+  if(PAYVYN_VERIFY_API&&PV.verifyId&&!PV.demo){
+    fetch(PAYVYN_VERIFY_API.replace(/\/$/,"")+"/verify/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:PV.verifyId,a:a,b:b})})
+      .then(function(res){return res.json().catch(function(){return null;});})
+      .then(function(d){
+        if(d&&d.ok&&d.status==="verified"){pvFinish(rt,ac);}
+        else{toast((d&&d.error)||"Amounts didn't match — check your statement and try again.");}
+      }).catch(function(){toast("Couldn't reach Payvyn — please try again.");});
+    return;
+  }
+  /* demo verification */
+  var got=[a,b].sort(function(x,y){return x-y;}),exp=(PV.micro||[]).slice().sort(function(x,y){return x-y;});
+  if(PV.micro&&Math.abs(got[0]-exp[0])<0.001&&Math.abs(got[1]-exp[1])<0.001){pvFinish(rt,ac);}
+  else{toast("Amounts didn't match — try the two demo amounts shown above.");}
+}
 function ccyName(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].f+" "+COUNTRIES[i].n;}return ccy||"";}
 function ccyRate(ccy){for(var i=0;i<COUNTRIES.length;i++){if(COUNTRIES[i].ccy===ccy)return COUNTRIES[i].rate;}return (dest&&dest.rate)||1;}
 
@@ -875,7 +986,7 @@ function receiptHtml(t){
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:1.05rem">PayExpress</b><span class="pill '+(paid?"good":"blue")+'" style="font-size:.72rem">'+(paid?"Paid out":"Processing")+'</span></div>'
     +receiptRow("Reference",t.ref||"")+receiptRow("Date",when)+receiptRow("Sender",t.sender||"-")
     +receiptRow("Recipient",t.recipient||"")+receiptRow("Destination",dest||"-")
-    +receiptRow("Country",cleanCountry(t.ccy)||(t.country||"-"))+receiptRow("Method",t.method||"")
+    +receiptRow("Country",cleanCountry(t.ccy)||(t.country||"-"))+receiptRow("Method",t.method||"")+(t.fundedVia?receiptRow("Funded by",t.fundedVia):"")
     +receiptRow("Amount sent",fmt(t.usd))+receiptRow("FX rate","1 USD = "+fmtN(t.rate||1)+" "+(t.ccy||""))
     +receiptRow("Amount received",rcvAmt(t))
     +'<div style="display:flex;gap:9px;margin-top:16px"><button class="btn btn-primary" style="flex:1" onclick="shareReceipt(\''+esc(t.ref||"")+'\')">Share receipt</button><button class="btn" onclick="go(\'activity\')">Done</button></div>';
@@ -890,12 +1001,15 @@ function sendMoney(){
   if(!rid||rid==="__add"){toast("Choose or add a recipient first");go("recipients");return;}
   var r=getRecipients().filter(function(x){return x.id===rid;})[0];
   if(!r){toast("Please add a recipient first");go("recipients");return;}
+  var pvBank=null;
+  if(payin==="payvyn"){pvBank=getPayvynBank();if(!pvBank||!pvBank.verified){toast("Link & verify your bank with Payvyn first");pickPayin("payvyn",document.querySelectorAll("#payinToggle .pin-opt")[1]);return;}}
   var kyc=null;try{kyc=JSON.parse(localStorage.getItem("px_kyc")||"null")}catch(e){}
   var ep=getApiEndpoint();
   var rcur=r.ccy||(dest&&dest.ccy)||"", rrate=ccyRate(rcur);
   var payout=Math.round(usd*rrate);
   var ref="PX-"+Math.floor(1000000+Math.random()*9000000);
-  var rec={ref:ref,date:new Date().toISOString(),sender:(kyc&&kyc.name)||"",recipient:r.name,recipientId:r.id,bank:r.bank,acct:r.acct,country:ccyName(rcur),method:method,usd:usd,fee:0,ccy:rcur,rate:rrate,payout:payout,status:"Processing"};
+  var fundedVia=(payin==="payvyn"&&pvBank)?("Payvyn · bank ••"+pvBank.last4):"Card";
+  var rec={ref:ref,date:new Date().toISOString(),sender:(kyc&&kyc.name)||"",recipient:r.name,recipientId:r.id,bank:r.bank,acct:r.acct,country:ccyName(rcur),method:method,fundedVia:fundedVia,usd:usd,fee:0,ccy:rcur,rate:rrate,payout:payout,status:"Processing"};
   persistTxn(rec);
   transfers.unshift({name:r.name,method:method,usd:usd,ccy:rcur,rate:rrate,status:"proc",date:"Now"});
   renderActivity();
@@ -908,6 +1022,11 @@ function sendMoney(){
       .then(function(res){return res.json().catch(function(){return{};});})
       .then(function(j){ if(j&&j.status) setTxnStatus(ref, j.status); })
       .catch(function(){}); }catch(e){}
+  }
+  if(payin==="payvyn"){
+    toast("Transfer "+ref+" created — "+fmt(usd)+" debited from your Payvyn-linked bank ••"+pvBank.last4+".");
+    go("activity");
+    return;
   }
   if(PLAID_TRANSFER_API){
     payByBank(rec,usd,kyc,r,rcur);
@@ -1086,7 +1205,7 @@ function renderAdmin(){
 function initAdmin(){renderAdmin();}
 
 loadRates(); loadCfg(); fillCountrySelects(); calc(); renderActivity(); renderHhfcuCard(); initAdmin();
-renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState(); renderPayChip();
+renderRecipients(); populateRecipSelect(); populateBanks(); applyLiveState(); renderPayChip(); renderPayvynChip();
 (function(){var fa=document.getElementById("fApi");if(fa)fa.value=getApiEndpoint();var fs=document.getElementById("fStatus");if(fs)fs.value=getStatusUrl();var fr=document.getElementById("fResolve");if(fr)fr.value=getResolveUrl();renderLiveState();})();
 pollStatuses(); setInterval(pollStatuses, 60000);
 </script>
