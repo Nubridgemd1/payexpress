@@ -249,6 +249,10 @@ tbody tr:last-child td{border-bottom:0}
 .pv-note span{color:#b7791f;font-weight:600}
 .pv-amts{display:flex;gap:8px;margin-top:9px}
 .pv-amts input{flex:1;min-width:0}
+.pv-badge{display:flex;align-items:center;gap:10px;margin:0 0 15px;padding:10px 12px;border-radius:12px;background:linear-gradient(120deg,#0b3b8c,#2b7de9);color:#fff;cursor:pointer;box-shadow:var(--shadow)}
+.pv-badge-mark{font-family:var(--disp);font-weight:700;font-size:.9rem;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:999px;flex:0 0 auto}
+.pv-badge-txt{font-size:.78rem;line-height:1.38}
+.pv-badge-txt b{font-weight:700}
 </style>
 </head>
 <body>
@@ -284,7 +288,7 @@ tbody tr:last-child td{border-bottom:0}
       <div class="hero-copy">
         <div class="eyebrow">Send money globally</div>
         <h1>Money across borders in minutes, at a fair rate.</h1>
-        <p class="sub">Pay with your card, we deliver straight to their bank account, card, wallet, or cash pickup in 20+ countries. Great rates, clear fees, no surprises.</p>
+        <p class="sub">Pay straight from your U.S. bank with Payvyn — or by card — and we deliver to their bank account, card, wallet, or cash pickup in 20+ countries. Great rates, clear fees, no surprises.</p>
         <div class="trust">
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg> Bank-grade security</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M5 12l7 7 7-7"/></svg> Same-day payout</span>
@@ -297,6 +301,10 @@ tbody tr:last-child td{border-bottom:0}
       </div>
 
       <div class="card calc">
+        <div class="pv-badge" onclick="focusPayvyn()">
+          <span class="pv-badge-mark">Payvyn</span>
+          <span class="pv-badge-txt"><b>Pay direct from your U.S. bank.</b> No card needed — verified securely. <span style="text-decoration:underline">Use Payvyn ›</span></span>
+        </div>
         <div class="fx-row">
           <div style="flex:1"><div class="lbl">You send</div><input id="sendAmt" type="text" inputmode="decimal" placeholder="0.00" oninput="calc()"></div>
           <span class="cur"><span class="flag" title="United States" style="background:linear-gradient(#3c3b6e,#3c3b6e) top left/42% 54% no-repeat,repeating-linear-gradient(180deg,#b22234 0 2px,#fff 2px 4px)"></span> USD</span>
@@ -325,11 +333,11 @@ tbody tr:last-child td{border-bottom:0}
 
         <div class="field" style="margin-top:14px"><label>Pay from</label></div>
         <div class="payin-toggle" id="payinToggle">
-          <button type="button" class="pin-opt" aria-pressed="true" onclick="pickPayin('card',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Card</button>
-          <button type="button" class="pin-opt" aria-pressed="false" onclick="pickPayin('payvyn',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M4 10v9h16v-9"/></svg>Bank · Payvyn</button>
+          <button type="button" class="pin-opt" aria-pressed="false" onclick="pickPayin('card',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Card</button>
+          <button type="button" class="pin-opt" aria-pressed="true" onclick="pickPayin('payvyn',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M4 10v9h16v-9"/></svg>Bank · Payvyn</button>
         </div>
 
-        <div id="payinCard">
+        <div id="payinCard" style="display:none">
         <div class="pay-chip" id="payChip">
           <div class="cc"></div>
           <div style="flex:1"><div style="font-weight:600;font-size:.9rem" class="mono" id="pcName">Add a card</div><div style="font-size:.78rem;color:var(--muted)" id="pcSub">Tap Change to add your card</div></div>
@@ -344,7 +352,7 @@ tbody tr:last-child td{border-bottom:0}
 
         </div><!-- /payinCard -->
 
-        <div id="payinPayvyn" style="display:none">
+        <div id="payinPayvyn" style="display:block">
           <div class="pv-panel">
             <div class="pv-head"><span class="pv-logo">Payvyn</span><span class="pv-tag">Pay direct from your U.S. bank</span></div>
             <div class="pv-body">
@@ -762,11 +770,12 @@ var PLAID_TRANSFER_API="";
 /* Payvyn — native pay-from-bank rail (BizFormCorp's own platform, no aggregator).
    Ownership is verified natively over ACH via the Payvyn verify backend. */
 var PAYVYN_VERIFY_API="https://payvyn-verify.fern-swift.workers.dev";
-var payin="card";              /* "card" | "payvyn" */
+var payin="payvyn";            /* "card" | "payvyn" — Payvyn (pay-from-bank) is the default */
 var PV={verifyId:null,demo:false,micro:null};
 function pvValidRouting(r){if(!/^\d{9}$/.test(r))return false;var d=r.split("").map(Number);var s=3*(d[0]+d[3]+d[6])+7*(d[1]+d[4]+d[7])+(d[2]+d[5]+d[8]);return s%10===0;}
 function getPayvynBank(){try{return JSON.parse(localStorage.getItem("px_payvyn_bank")||"null");}catch(e){return null;}}
 function setPayvynBank(b){try{localStorage.setItem("px_payvyn_bank",JSON.stringify(b));}catch(e){}}
+function focusPayvyn(){var t=document.getElementById("payinToggle");pickPayin("payvyn",t?t.querySelectorAll(".pin-opt")[1]:null);var p=document.getElementById("payinPayvyn");try{if(p&&p.scrollIntoView)p.scrollIntoView({behavior:"smooth",block:"center"});}catch(e){}if(!getPayvynBank())openPayvynLink();}
 function pickPayin(kind,el){payin=kind;var t=document.getElementById("payinToggle");if(t){var bs=t.querySelectorAll(".pin-opt");for(var i=0;i<bs.length;i++)bs[i].setAttribute("aria-pressed","false");}if(el)el.setAttribute("aria-pressed","true");var c=document.getElementById("payinCard"),p=document.getElementById("payinPayvyn");if(c)c.style.display=(kind==="payvyn"?"none":"block");if(p)p.style.display=(kind==="payvyn"?"block":"none");}
 function renderPayvynChip(){var nm=document.getElementById("pvName"),sub=document.getElementById("pvSub"),btn=document.getElementById("pvLinkBtn");if(!nm)return;var b=getPayvynBank();if(b&&b.last4){nm.textContent=(b.bank?b.bank+" ":"Bank ")+"••••"+b.last4;sub.innerHTML='<span style="color:var(--good);font-weight:600">● Verified by Payvyn</span> — '+esc(b.type||"checking");if(btn)btn.textContent="Change";}else{nm.textContent="Link your bank";sub.textContent="Verified securely — no card needed";if(btn)btn.textContent="Link";}}
 function openPayvynLink(){var e=document.getElementById("pvEdit");if(!e)return;e.style.display=(e.style.display==="block"?"none":"block");document.getElementById("pvStep1").style.display="block";document.getElementById("pvStep2").style.display="none";PV.verifyId=null;PV.demo=false;}
@@ -898,7 +907,7 @@ function resolveAccount(){
   var acct=(acctEl.value||"").replace(/\s/g,""),bank=(bankEl&&bankEl.value||"").trim(),ccy=(document.getElementById("recCountry")||{}).value||"NGN";
   if(acct.length<6){ if(st)st.textContent=""; return; }
   var ru=getResolveUrl();
-  if(!ru){ if(st){st.style.color="#8a6d1f";st.textContent="Account-name verification activates once the backend is connected.";} return; }
+  if(!ru){ if(st){st.style.color="var(--muted)";st.textContent="We'll confirm the recipient's account name before your transfer is sent.";} return; }
   if(st){st.style.color="var(--muted)";st.textContent="Checking account name…";}
   try{ fetch(ru,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({currency:ccy,institution:bank,account:acct})})
     .then(function(r){return r.json().catch(function(){return{};});})
