@@ -1107,7 +1107,7 @@ function renderAdminStats(){
 }
 function renderAdminTxns(){
   var tx=getTxns();var b=document.getElementById("adminTxnBody");if(!b)return;
-  if(!tx.length){b.innerHTML='<tr><td colspan="7" style="color:var(--muted)">No transactions yet. Send a transfer on the Send tab, or click "Add demo transactions".</td></tr>';return;}
+  if(!tx.length){b.innerHTML='<tr><td colspan="7" style="color:var(--muted)">No transactions yet. Transfers appear here once senders start sending on the Send tab.</td></tr>';return;}
   var h="";for(var i=0;i<tx.length;i++){var t=tx[i];var d=new Date(t.date);var ds=isNaN(d.getTime())?(t.date||""):d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
     var paid=(t.status||"").toLowerCase().indexOf("paid")>=0;var tag=paid?'<span class="tag paid">'+t.status+'</span>':'<span class="tag proc">'+(t.status||"Processing")+'</span>';
     h+='<tr><td class="mono">'+ds+'</td><td class="mono">'+(t.ref||"")+'</td><td>'+(t.recipient||"")+'</td><td>'+(t.country||"")+'</td><td class="n mono">'+fmt(Number(t.usd)||0)+'</td><td class="n mono">'+fmtN(Number(t.payout)||0)+' '+(t.ccy||"")+'</td><td style="text-align:right">'+tag+'</td></tr>';}
