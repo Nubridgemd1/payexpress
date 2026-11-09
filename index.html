@@ -468,7 +468,8 @@ tbody tr:last-child td{border-bottom:0}
           <div class="field"><label>Date of birth</label><input id="k-dob" placeholder="MM/DD/YYYY" inputmode="numeric"></div>
           <div class="field"><label>SSN / ITIN</label><input id="k-ssn" placeholder="___-__-____" inputmode="numeric"></div>
         </div>
-        <div class="field"><label>Residential address</label><input id="k-addr" placeholder="Street, city, state, ZIP"></div>
+        <div class="field"><label>Residential address <span style="font-weight:400;color:var(--muted);font-size:.78rem">- physical address, no PO box</span></label><input id="k-addr" placeholder="Street, city, state, ZIP"></div>
+        <div class="field"><label>Country of citizenship</label><input id="k-citizen" placeholder="e.g. United States"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div class="field"><label>Mobile number</label><input id="k-phone" inputmode="tel"></div>
           <div class="field"><label>Email</label><input id="k-email" type="email"></div>
@@ -507,7 +508,18 @@ tbody tr:last-child td{border-bottom:0}
       </div>
 
       <div class="card pad" style="margin-top:14px">
-        <h3 style="margin:0">Your HHFCU membership <span style="font-weight:700;color:var(--good,#1f8a52);font-size:.72rem;background:var(--good-w,#e9f8ef);padding:2px 9px;border-radius:999px;vertical-align:middle">INCLUDED</span></h3>
+        <h3 style="margin:0 0 4px">About your transfers</h3>
+        <p class="hint">Helps us understand your activity (KYC risk profile) - required for compliance.</p>
+        <div class="field"><label>Occupation / employer</label><input id="k-occ" placeholder="e.g. Nurse - Memorial Health"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Source of funds</label><select id="k-source"><option value="">Select...</option><option>Salary / wages</option><option>Business income</option><option>Savings</option><option>Gift</option><option>Sale of asset</option><option>Investment / returns</option><option>Other</option></select></div>
+          <div class="field"><label>Purpose of transfers</label><select id="k-purpose"><option value="">Select...</option><option>Family support</option><option>Gift</option><option>Bills / rent</option><option>Education</option><option>Medical</option><option>Business payment</option><option>Other</option></select></div>
+        </div>
+        <div class="field"><label>Expected amount sent per month</label><select id="k-volume"><option value="">Select...</option><option>Under $1,000</option><option>$1,000 - $3,000</option><option>$3,000 - $10,000</option><option>Over $10,000</option></select></div>
+      </div>
+
+      <div class="card pad" style="margin-top:14px">
+        <h3 style="margin:0">Your HHFCU membership<span style="font-weight:700;color:var(--good,#1f8a52);font-size:.72rem;background:var(--good-w,#e9f8ef);padding:2px 9px;border-radius:999px;vertical-align:middle">INCLUDED</span></h3>
         <p class="hint">Every PayExpress sender becomes a member of <b>Heritage Hub Federal Credit Union</b> - that's what lets HHFCU verify you and move your money, all <b>NCUA-insured</b>. It's <b>free to join</b>; a one-time <b>$5 membership share</b> opens your account (it stays in your HHFCU savings and is refundable). We open it for you automatically from the details above - nothing extra to fill in.</p>
         <label class="opt"><input type="checkbox" id="k-fom" checked> <span>I'm eligible for HHFCU membership and want to join (field of membership / common bond).</span></label>
       </div>
@@ -522,6 +534,8 @@ tbody tr:last-child td{border-bottom:0}
           <div class="num mono">****  ****  ****  ****</div>
           <div class="row"><span>YOUR NAME</span><span>NCUA insured</span></div>
         </div>
+        <label class="opt"><input type="checkbox" id="k-att-funds"> <span>I am sending my own funds, from a lawful source, on my own behalf - not on behalf of anyone else.</span></label>
+        <label class="opt"><input type="checkbox" id="k-att-ofac"> <span>Neither I nor my recipient appears on any OFAC or government sanctions list.</span></label>
         <label class="opt"><input type="checkbox" id="k-consent"> <span>I apply for Heritage Hub FCU membership, authorize HHFCU and PayExpress to verify my identity (CIP / KYC), agree to the $5 membership share and the HHFCU Membership &amp; Account Agreement, and consent to E-SIGN and (if requested) card terms.</span></label>
       </div>
 
@@ -1060,13 +1074,21 @@ function submitKyc(){
   var fom=document.getElementById("k-fom");
   if(fom&&!fom.checked){toast("HHFCU membership is required to send - please confirm eligibility");return;}
   if(!document.getElementById("k-consent").checked){toast("Please agree to membership & identity verification");return;}
+  var gv=function(id){return ((document.getElementById(id)||{}).value||"").trim();};
+  var occ=gv("k-occ"),source=gv("k-source"),purpose=gv("k-purpose"),volume=gv("k-volume"),citizen=gv("k-citizen");
+  if(!source||!purpose||!volume){toast("Tell us the source, purpose and expected amount of your transfers");return;}
+  var aF=document.getElementById("k-att-funds"),aO=document.getElementById("k-att-ofac");
+  if(aF&&!aF.checked){toast("Please confirm the funds are your own and from a lawful source");return;}
+  if(aO&&!aO.checked){toast("Please confirm the OFAC / sanctions statement");return;}
   var ssn=((document.getElementById("k-ssn")||{}).value||"").replace(/\D/g,"");
   var member={status:"pending",memberNo:"HH"+Math.floor(100000+Math.random()*899999),name:name,
     dob:((document.getElementById("k-dob")||{}).value||""),ssn4:ssn.slice(-4),
     address:((document.getElementById("k-addr")||{}).value||""),phone:((document.getElementById("k-phone")||{}).value||""),
-    email:((document.getElementById("k-email")||{}).value||""),share:5,joinedTs:Date.now()};
+    email:((document.getElementById("k-email")||{}).value||""),
+    citizenship:citizen,occupation:occ,sourceOfFunds:source,purpose:purpose,expectedMonthly:volume,
+    attFunds:true,attOfac:true,share:5,joinedTs:Date.now()};
   try{localStorage.setItem("px_membership",JSON.stringify(member));}catch(e){}
-  try{localStorage.setItem("px_kyc",JSON.stringify({status:"pending",name:name,email:member.email,memberNo:member.memberNo}));}catch(e){}
+  try{localStorage.setItem("px_kyc",JSON.stringify({status:"pending",name:name,email:member.email,memberNo:member.memberNo,citizenship:citizen,occupation:occ,sourceOfFunds:source,purpose:purpose,expectedMonthly:volume}));}catch(e){}
   var virt=document.getElementById("chkVirtual").checked,plas=document.getElementById("chkPlastic").checked;
   if(virt||plas){var card={holder:name.toUpperCase().slice(0,22),last4:String(Math.floor(1000+Math.random()*9000)),virtual:virt,plastic:plas,issued:true};try{localStorage.setItem("px_hhfcu_card",JSON.stringify(card));}catch(e){}}
   renderHhfcuCard();
