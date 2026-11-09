@@ -198,6 +198,7 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
   <div class="nav-in" role="tablist">
     <button role="tab" aria-selected="true" onclick="go('dashboard',this)">Dashboard</button>
     <button role="tab" aria-selected="false" onclick="go('transactions',this)">Transactions</button>
+    <button role="tab" aria-selected="false" onclick="go('members',this)">Members</button>
     <button role="tab" aria-selected="false" onclick="go('rates',this)">Rates &amp; Fees</button>
     <button role="tab" aria-selected="false" onclick="go('contact',this)">Contact</button>
     <button role="tab" aria-selected="false" onclick="go('marketing',this)">Marketing</button>
@@ -255,6 +256,15 @@ input.rt{width:130px;text-align:right;font-variant-numeric:tabular-nums}
       </table></div>
     </div>
     <p style="font-size:.78rem;color:var(--muted);margin-top:10px">Transactions initiated in the customer app appear here automatically. Changing a status updates the record and the dashboard.</p>
+  </section>
+
+  <!-- MEMBERS / COMPLIANCE -->
+  <section class="view" id="view-members">
+    <div class="section-h"><div><div class="eyebrow">CIP / KYC</div><h1 class="pg">Members &amp; compliance</h1></div>
+      <button class="btn btn-ghost" onclick="renderMembers()">Refresh</button>
+    </div>
+    <p style="font-size:.86rem;color:var(--muted);margin:-4px 0 12px">Customer identity and risk-profile captured in the app's Verify step (CIP / KYC / BSA-AML) - including source of funds, purpose and expected volume. Device-local in this prototype; in production this record is held in HHFCU's compliance system as Transmitter of Record.</p>
+    <div id="memberWrap"></div>
   </section>
 
   <!-- RATES & FEES -->
@@ -718,7 +728,36 @@ function copyVid(i,mode){var v=VIDEOS[i];var n=i+1;var txt="";
 }
 function fallbackCopy(t){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();}
 
-function boot(){ loadRates(); renderKpis(); renderTx(); renderRateEditor(); fillContact(); renderFlyers(); renderVideos(); }
+/* members / compliance (CIP / KYC) - reads px_membership + px_kyc written by the app's Verify step */
+function getMember(){try{return JSON.parse(localStorage.getItem("px_membership")||"null");}catch(e){return null;}}
+function getKyc(){try{return JSON.parse(localStorage.getItem("px_kyc")||"null");}catch(e){return null;}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c];});}
+function renderMembers(){
+  var w=document.getElementById("memberWrap");if(!w)return;
+  var m=getMember(),k=getKyc();
+  if(!m&&!k){w.innerHTML='<div class="card pad"><p style="margin:0;color:var(--muted)">No member record on this device yet. When a customer completes the Verify step in the app, their CIP / KYC record appears here.</p></div>';return;}
+  m=m||{};k=k||{};
+  var rows=[
+    ["Status",(m.status||k.status||"pending")],
+    ["HHFCU member no.",(m.memberNo||k.memberNo||"-")],
+    ["Full legal name",(m.name||k.name||"-")],
+    ["Date of birth",(m.dob||"-")],
+    ["SSN / ITIN (last 4)",(m.ssn4?("***-**-"+m.ssn4):"-")],
+    ["Country of citizenship",(m.citizenship||k.citizenship||"-")],
+    ["Residential address",(m.address||"-")],
+    ["Mobile",(m.phone||"-")],
+    ["Email",(m.email||k.email||"-")],
+    ["Occupation / employer",(m.occupation||k.occupation||"-")],
+    ["Source of funds",(m.sourceOfFunds||k.sourceOfFunds||"-")],
+    ["Purpose of transfers",(m.purpose||k.purpose||"-")],
+    ["Expected amount / month",(m.expectedMonthly||k.expectedMonthly||"-")],
+    ["Own-funds / lawful-source",(m.attFunds?"Confirmed":"-")],
+    ["OFAC / sanctions",(m.attOfac?"Confirmed":"-")]
+  ];
+  var body=rows.map(function(r){return '<tr><td style="color:var(--muted);white-space:nowrap">'+esc(r[0])+'</td><td><b>'+esc(r[1])+'</b></td></tr>';}).join("");
+  w.innerHTML='<div class="card"><div class="tablewrap"><table><tbody>'+body+'</tbody></table></div></div>';
+}
+function boot(){ loadRates(); renderKpis(); renderTx(); renderMembers(); renderRateEditor(); fillContact(); renderFlyers(); renderVideos(); }
 boot();
 </script>
 </body>
